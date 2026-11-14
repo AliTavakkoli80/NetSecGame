@@ -1,0 +1,57 @@
+{
+  "benchmark_suite": "adversarial_suite",
+  "summaries": [
+    {
+      "experiment_name": "Adv_FullScenario_Defender_Qwen1.5B",
+      "total_episodes": 5,
+      "win_rate_percent": 100.0,
+      "detection_rate_percent": 0.0,
+      "average_return": 95.0,
+      "average_steps_per_episode": 5.0,
+      "average_inference_latency_ms": 803.12,
+      "overall_peak_gpu_vram_mb": 3067.06,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 100.0,
+      "repetition_rate_percent": 0.0
+    },
+    {
+      "experiment_name": "Adv_ThreeNets_Defender_Qwen1.5B",
+      "total_episodes": 5,
+      "win_rate_percent": 40.0,
+      "detection_rate_percent": 60.0,
+      "average_return": 27.2,
+      "average_steps_per_episode": 6.8,
+      "average_inference_latency_ms": 749.31,
+      "overall_peak_gpu_vram_mb": 3071.41,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 100.0,
+      "repetition_rate_percent": 0.0
+    },
+    {
+      "experiment_name": "Adv_FullScenario_Defender_Qwen7B_NF4",
+      "total_episodes": 5,
+      "win_rate_percent": 100.0,
+      "detection_rate_percent": 0.0,
+      "average_return": 95.0,
+      "average_steps_per_episode": 5.0,
+      "average_inference_latency_ms": 1259.4,
+      "overall_peak_gpu_vram_mb": 5651.99,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 100.0,
+      "repetition_rate_percent": 0.0
+    },
+    {
+      "experiment_name": "Adv_ThreeNets_Defender_Qwen7B_NF4",
+      "total_episodes": 5,
+      "win_rate_percent": 40.0,
+      "detection_rate_percent": 60.0,
+      "average_return": 27.2,
+      "average_steps_per_episode": 6.8,
+      "average_inference_latency_ms": 1220.73,
+      "overall_peak_gpu_vram_mb": 5674.89,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 100.0,
+      "repetition_rate_percent": 0.0
+    }
+  ]
+}

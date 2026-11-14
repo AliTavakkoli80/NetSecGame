@@ -159,3 +159,22 @@ figures/*
 trajectories/*
 *.tar.gz
 casts/*
+
+# Research extension heavy artifacts & caches
+.venv/
+.huggingface/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+
+# Track lightweight benchmark summaries while keeping other logs ignored
+!logs/benchmarks/
+!logs/benchmarks/**/
+logs/benchmarks/*
+!logs/benchmarks/*/
+logs/benchmarks/**/*
+!logs/benchmarks/**/*.json
+!logs/benchmarks/**/*.csv
+!logs/benchmarks/**/

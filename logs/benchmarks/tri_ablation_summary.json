@@ -1,0 +1,41 @@
+{
+  "benchmark_suite": "tri_ablation",
+  "summaries": [
+    {
+      "experiment_name": "Config_A_RandomBaseline",
+      "total_episodes": 5,
+      "win_rate_percent": 0.0,
+      "average_return": -60.0,
+      "average_steps_per_episode": 50.0,
+      "average_inference_latency_ms": 0.05,
+      "overall_peak_gpu_vram_mb": 2944.4,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 9.6,
+      "repetition_rate_percent": 70.0
+    },
+    {
+      "experiment_name": "Config_B_RawSLM",
+      "total_episodes": 5,
+      "win_rate_percent": 0.0,
+      "average_return": -60.0,
+      "average_steps_per_episode": 50.0,
+      "average_inference_latency_ms": 693.03,
+      "overall_peak_gpu_vram_mb": 3021.18,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 2.0,
+      "repetition_rate_percent": 96.0
+    },
+    {
+      "experiment_name": "Config_C_MemoryAugmentedSLM",
+      "total_episodes": 5,
+      "win_rate_percent": 0.0,
+      "average_return": -60.0,
+      "average_steps_per_episode": 50.0,
+      "average_inference_latency_ms": 703.29,
+      "overall_peak_gpu_vram_mb": 3056.29,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 4.0,
+      "repetition_rate_percent": 96.0
+    }
+  ]
+}

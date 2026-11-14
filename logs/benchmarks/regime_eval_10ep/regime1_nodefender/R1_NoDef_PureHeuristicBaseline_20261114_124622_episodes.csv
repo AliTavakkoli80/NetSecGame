@@ -1,0 +1,11 @@
+episode_id,model_name,scenario,steps_taken,total_reward,win,detected,timeout,syntax_errors,invalid_actions,redundant_actions,raw_slm_valid_count,override_count,raw_slm_valid_rate_percent,override_rate_percent,mean_stealth_risk,total_stealth_deferred,total_latency_ms,total_tokens
+0,PureHeuristicBaseline,scenario_full_nodefender,17,83.0,True,False,False,0,0,0,17,0,100.0,0.0,0.4412,0,0.0,0
+1,PureHeuristicBaseline,scenario_full_nodefender,64,36.0,True,False,False,0,0,0,64,0,100.0,0.0,0.7484,0,0.0,0
+2,PureHeuristicBaseline,scenario_full_nodefender,50,50.0,True,False,False,0,0,0,50,0,100.0,0.0,0.742,0,0.0,0
+3,PureHeuristicBaseline,scenario_full_nodefender,16,84.0,True,False,False,0,0,0,16,0,100.0,0.0,0.4062,0,0.0,0
+4,PureHeuristicBaseline,scenario_full_nodefender,27,73.0,True,False,False,0,0,0,27,0,100.0,0.0,0.5778,0,0.0,0
+5,PureHeuristicBaseline,scenario_full_nodefender,27,73.0,True,False,False,0,0,0,27,0,100.0,0.0,0.5778,0,0.0,0
+6,PureHeuristicBaseline,scenario_full_nodefender,16,84.0,True,False,False,0,0,0,16,0,100.0,0.0,0.4062,0,0.0,0
+7,PureHeuristicBaseline,scenario_full_nodefender,17,83.0,True,False,False,0,0,0,17,0,100.0,0.0,0.4412,0,0.0,0
+8,PureHeuristicBaseline,scenario_full_nodefender,64,36.0,True,False,False,0,0,0,64,0,100.0,0.0,0.7484,0,0.0,0
+9,PureHeuristicBaseline,scenario_full_nodefender,17,83.0,True,False,False,0,0,0,17,0,100.0,0.0,0.4412,0,0.0,0

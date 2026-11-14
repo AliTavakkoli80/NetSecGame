@@ -1,0 +1,6 @@
+episode_id,model_name,scenario,steps_taken,total_reward,win,detected,timeout,syntax_errors,invalid_actions,redundant_actions,raw_slm_valid_count,override_count,raw_slm_valid_rate_percent,override_rate_percent,mean_stealth_risk,total_latency_ms,total_tokens
+0,Qwen/Qwen2.5-Coder-1.5B-Instruct,scenario_full_defender,18,-28.0,False,True,False,0,0,9,15,12,83.33,66.67,0.2833,15482.362912000553,1120
+1,Qwen/Qwen2.5-Coder-1.5B-Instruct,scenario_full_defender,5,-15.0,False,True,False,0,0,1,4,2,80.0,40.0,0.13,4085.438849000184,323
+2,Qwen/Qwen2.5-Coder-1.5B-Instruct,scenario_full_defender,11,-21.0,False,True,False,0,0,4,10,5,90.91,45.45,0.1818,8769.257968000147,687
+3,Qwen/Qwen2.5-Coder-1.5B-Instruct,scenario_full_defender,16,-26.0,False,True,False,0,0,2,9,9,56.25,56.25,0.3406,12171.013290000701,953
+4,Qwen/Qwen2.5-Coder-1.5B-Instruct,scenario_full_defender,8,-18.0,False,True,False,0,0,3,8,3,100.0,37.5,0.1375,6819.7218770010295,540

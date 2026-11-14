@@ -1,0 +1,6 @@
+episode_id,model_name,scenario,steps_taken,total_reward,win,detected,timeout,syntax_errors,invalid_actions,redundant_actions,raw_slm_valid_count,override_count,raw_slm_valid_rate_percent,override_rate_percent,mean_stealth_risk,total_latency_ms,total_tokens
+0,PureHeuristicBaseline,scenario_full_defender,17,-27.0,False,True,False,0,0,0,17,0,100.0,0.0,0.4941,0.0,0
+1,PureHeuristicBaseline,scenario_full_defender,6,-16.0,False,True,False,0,0,0,6,0,100.0,0.0,0.2083,0.0,0
+2,PureHeuristicBaseline,scenario_full_defender,10,-20.0,False,True,False,0,0,0,10,0,100.0,0.0,0.36,0.0,0
+3,PureHeuristicBaseline,scenario_full_defender,15,-25.0,False,True,False,0,0,0,15,0,100.0,0.0,0.5233,0.0,0
+4,PureHeuristicBaseline,scenario_full_defender,7,-17.0,False,True,False,0,0,0,7,0,100.0,0.0,0.3071,0.0,0

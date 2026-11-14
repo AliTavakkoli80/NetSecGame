@@ -1,0 +1,67 @@
+# Full Network Scenario with Stochastic Global Defender (ESWA Protocol Parity)
+coordinator:
+  agents:
+    Attacker:
+      max_steps: 100
+      goal:
+        description: "Exfiltrate data to '213.47.23.195'"
+        is_any_part_of_goal_random: True
+        known_networks: []
+        known_hosts: []
+        controlled_hosts: []
+        known_services: {}
+        known_data: {213.47.23.195: [random]}
+        known_blocks: {}
+      start_position:
+        known_networks: []
+        known_hosts: []
+        controlled_hosts: [213.47.23.195, random]
+        known_services: {}
+        known_data: {}
+        known_blocks: {}
+
+    Defender:
+      goal:
+        description: "Block all attackers"
+        is_any_part_of_goal_random: False
+        known_networks: []
+        known_hosts: []
+        controlled_hosts: []
+        known_services: {}
+        known_data: {}
+        known_blocks: {213.47.23.195: 'all_attackers'}
+      start_position:
+        known_networks: []
+        known_hosts: []
+        controlled_hosts: [all_local]
+        known_services: {}
+        known_data: {}
+        blocked_ips: {}
+        known_blocks: {}
+
+env:
+  random_seed: 'random'
+  scenario: 'scenario1'
+  use_global_defender: True
+  use_dynamic_addresses: True
+  use_firewall: True
+  save_trajectories: False
+  required_players: 1
+  rewards:
+    success: 100
+    step: -1
+    fail: -10
+    false_positive: -5
+  actions:
+    scan_network:
+      prob_success: 1.0
+    find_services:
+      prob_success: 1.0
+    exploit_service:
+      prob_success: 1.0
+    find_data:
+      prob_success: 1.0
+    exfiltrate_data:
+      prob_success: 1.0
+    block_ip:
+      prob_success: 1.0

@@ -1,0 +1,11 @@
+episode_id,model_name,scenario,steps_taken,total_reward,win,detected,timeout,syntax_errors,invalid_actions,redundant_actions,raw_slm_valid_count,override_count,raw_slm_valid_rate_percent,override_rate_percent,mean_stealth_risk,total_stealth_deferred,total_latency_ms,total_tokens
+0,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,16,-26.0,False,True,False,0,0,1,11,6,68.75,37.5,0.3469,0,25130.761167001765,1026
+1,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,6,-16.0,False,True,False,0,0,0,6,0,100.0,0.0,0.15,0,10040.027194998402,418
+2,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,14,-24.0,False,True,False,0,0,5,14,5,100.0,35.71,0.1964,0,28218.054037996808,1037
+3,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,15,-25.0,False,True,False,0,0,0,12,3,80.0,20.0,0.32,0,25575.737039998785,984
+4,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,8,-18.0,False,True,False,0,0,1,8,1,100.0,12.5,0.1375,0,13399.617023998871,551
+5,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,20,-30.0,False,True,False,0,0,2,18,4,90.0,20.0,0.2575,0,37541.471180999906,1409
+6,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,41,59.0,True,False,False,0,0,14,40,15,97.56,36.59,0.311,0,87909.61292600332,3093
+7,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,32,-42.0,False,True,False,0,0,5,29,8,90.62,25.0,0.3969,0,65477.47625899774,2230
+8,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,15,-25.0,False,True,False,0,0,4,15,4,100.0,26.67,0.22,0,26062.825270001667,1017
+9,unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit,scenario_full_defender,9,-19.0,False,True,False,0,0,0,9,0,100.0,0.0,0.2222,0,15184.663233999345,620

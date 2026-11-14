@@ -1,0 +1,29 @@
+{
+  "benchmark_suite": "scale_comparison",
+  "summaries": [
+    {
+      "experiment_name": "Condition_1_Qwen1.5B_Masked",
+      "total_episodes": 5,
+      "win_rate_percent": 100.0,
+      "average_return": 92.0,
+      "average_steps_per_episode": 8.0,
+      "average_inference_latency_ms": 777.95,
+      "overall_peak_gpu_vram_mb": 3079.23,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 62.5,
+      "repetition_rate_percent": 0.0
+    },
+    {
+      "experiment_name": "Condition_2_Qwen7B_NF4_Masked",
+      "total_episodes": 5,
+      "win_rate_percent": 100.0,
+      "average_return": 92.0,
+      "average_steps_per_episode": 8.0,
+      "average_inference_latency_ms": 1260.71,
+      "overall_peak_gpu_vram_mb": 5687.49,
+      "valid_action_rate_percent": 100.0,
+      "state_change_efficiency_percent": 62.5,
+      "repetition_rate_percent": 0.0
+    }
+  ]
+}
