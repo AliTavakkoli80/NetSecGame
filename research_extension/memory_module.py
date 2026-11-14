@@ -1147,8 +1147,13 @@ class SemanticMemoryStore:
             "subnets — to evade SIEM burst detection."
         )
 
-        # 4. Permissible Unexplored Actions
-        lines.append("\n=== PERMISSIBLE UNEXPLORED ACTIONS ===")
+        # 4. Permissible Unexplored Actions (Stealth-Scheduled when pacing is active)
+        section_header = (
+            "=== STEALTH-SCHEDULED PERMISSIBLE UNEXPLORED ACTIONS ==="
+            if self.enable_stealth_pacing
+            else "=== PERMISSIBLE UNEXPLORED ACTIONS ==="
+        )
+        lines.append(f"\n{section_header}")
         if display_actions:
             for idx, act in enumerate(display_actions, start=1):
                 lines.append(
@@ -1177,7 +1182,8 @@ class SemanticMemoryStore:
                 lines.append("  - Episode start (no prior actions).")
 
         lines.append(
-            "\nSelect the best next action strictly as a single JSON object with keys "
-            "\"action\" and \"parameters\"."
+            "\nSelect ONE entry from the permissible actions list above (do not repeat actions from "
+            "the Recent Episodic Trace or omit required parameter keys) and output strictly a single "
+            "JSON object with keys \"action\" and \"parameters\"."
         )
         return "\n".join(lines)
