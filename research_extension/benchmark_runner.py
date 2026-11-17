@@ -114,9 +114,9 @@ class PureHeuristicBaseline:
         "ScanNetwork": 4,
     }
 
-    def __init__(self, host: str = "127.0.0.1", port: int = 9000) -> None:
+    def __init__(self, host: str = "127.0.0.1", port: int = 9000, enable_stealth_pacing: bool = False) -> None:
         self.agent = BaseAgent(host, port, AgentRole.Attacker)
-        self.semantic_memory = SemanticMemoryStore(stealth_window=5, enable_stealth_pacing=False)
+        self.semantic_memory = SemanticMemoryStore(stealth_window=5, enable_stealth_pacing=enable_stealth_pacing)
 
     def connect(self) -> Any:
         for attempt in range(4):
@@ -165,7 +165,11 @@ class PureHeuristicBaseline:
 
             return (base_prio, sub_prio, str(sorted(params.items())))
 
-        candidates_sorted = sorted(candidates, key=_priority_key)
+        if self.semantic_memory.enable_stealth_pacing:
+            # SemanticMemoryStore.get_valid_action_space already ranks candidates by descending U(a)
+            candidates_sorted = candidates
+        else:
+            candidates_sorted = sorted(candidates, key=_priority_key)
         for cand in candidates_sorted:
             ok, netsec_act = create_action_from_response(cand, obs.state)
             if ok and netsec_act is not None:
@@ -520,20 +524,27 @@ class BenchmarkHarness:
         experiment_name: str = "Baseline_PureHeuristic",
         num_episodes: int = 5,
         deterministic_filenames: bool = False,
+        enable_stealth_pacing: bool = False,
     ) -> Tuple[Dict[str, Any], MetricsLogger]:
         """Run deterministic domain-agnostic PureHeuristicBaseline under identical episode seeds."""
         metrics = MetricsLogger(output_dir=self.output_dir, experiment_name=experiment_name)
+        jsonl_path = Path(self.output_dir) / f"{experiment_name}_episodes.jsonl" if deterministic_filenames else None
+        if jsonl_path is not None and jsonl_path.exists():
+            jsonl_path.unlink()
         baseline: Optional[PureHeuristicBaseline] = None
         self.start_server()
 
         try:
-            baseline = PureHeuristicBaseline(host=self.host, port=self.port)
+            baseline = PureHeuristicBaseline(
+                host=self.host, port=self.port, enable_stealth_pacing=enable_stealth_pacing
+            )
             baseline.connect()
+            model_lbl = "PureHeuristicWithStealth" if enable_stealth_pacing else "PureHeuristicBaseline"
             for ep in range(num_episodes):
                 ep_seed = self.seed + ep
                 obs = baseline.reset_episode(seed=ep_seed)
                 goal_desc = str((getattr(obs, "info", {}) or {}).get("goal_description", "") or "")
-                metrics.start_episode(episode_id=ep, model_name="PureHeuristicBaseline", scenario=self.scenario_name)
+                metrics.start_episode(episode_id=ep, model_name=model_lbl, scenario=self.scenario_name)
 
                 step_num = 0
                 win = detected = timeout = False
@@ -576,7 +587,9 @@ class BenchmarkHarness:
                         stealth_risk_score=risk,
                     )
                     obs = next_obs
-                metrics.end_episode(win=win, detected=detected, timeout=timeout)
+                ep_rec = metrics.end_episode(win=win, detected=detected, timeout=timeout)
+                if jsonl_path is not None:
+                    metrics.append_episode_jsonl(ep_rec, jsonl_path)
                 if num_episodes >= 25 and ((ep + 1) % 25 == 0 or (ep + 1) == num_episodes):
                     so_far = metrics.get_summary()
                     logger.info(
@@ -754,6 +767,11 @@ def main() -> None:
                 for exp_name, ep_cnt, runner_fn in [
                     ("Baseline_RandomAttacker", random_episodes, harness_r.run_baseline_random_agent),
                     ("Baseline_PureHeuristic", slm_episodes, harness_r.run_baseline_heuristic_agent),
+                    (
+                        "Ablation_PureHeuristic_WithStealth",
+                        slm_episodes,
+                        lambda **kw: harness_r.run_baseline_heuristic_agent(enable_stealth_pacing=True, **kw),
+                    ),
                 ]:
                     cached = _load_completed_checkpoint(out_dir, exp_name, ep_cnt)
                     if cached is not None:

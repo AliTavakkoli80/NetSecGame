@@ -191,6 +191,7 @@ def analyze_suite(suite_root: Path) -> Dict[str, Any]:
         targets = [
             "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth",
             "Baseline_PureHeuristic",
+            "Ablation_PureHeuristic_WithStealth",
             "Ablation_SLM_7B_NF4_RawReAct",
             "Proposed_SLM_1.5B_BF16_BeliefGraph_WithStealth",
         ]

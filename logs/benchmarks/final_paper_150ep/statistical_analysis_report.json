@@ -46,6 +46,28 @@
             "cliffs_delta": -0.034
           }
         },
+        "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth__vs__Ablation_PureHeuristic_WithStealth": {
+          "mcnemar_win": {
+            "n_paired": 150,
+            "a_only_wins": 0,
+            "b_only_wins": 1,
+            "p_value": 1.0
+          },
+          "wilcoxon_return": {
+            "n_paired": 150,
+            "mean_a": 69.487,
+            "mean_b": 75.013,
+            "p_value": 0.011257,
+            "cliffs_delta": -0.2368
+          },
+          "wilcoxon_steps": {
+            "n_paired": 150,
+            "mean_a": 29.78,
+            "mean_b": 24.987,
+            "p_value": 0.011257,
+            "cliffs_delta": 0.2368
+          }
+        },
         "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth__vs__Ablation_SLM_7B_NF4_RawReAct": {
           "mcnemar_win": {
             "n_paired": 150,
@@ -92,6 +114,355 @@
         }
       },
       "entropy_and_phases": {
+        "Ablation_PureHeuristic_WithStealth": {
+          "mean_entropy_bits": 1.5488,
+          "entropy_trajectory": [
+            {
+              "step": 1,
+              "mean_entropy": 0.0,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 2,
+              "mean_entropy": 1.0,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 3,
+              "mean_entropy": 1.585,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 4,
+              "mean_entropy": 1.5,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 5,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 6,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 7,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 8,
+              "mean_entropy": 2.2126,
+              "ci95_entropy": 0.0286,
+              "n": 150
+            },
+            {
+              "step": 9,
+              "mean_entropy": 2.1033,
+              "ci95_entropy": 0.0572,
+              "n": 150
+            },
+            {
+              "step": 10,
+              "mean_entropy": 2.0657,
+              "ci95_entropy": 0.0675,
+              "n": 150
+            },
+            {
+              "step": 11,
+              "mean_entropy": 1.959,
+              "ci95_entropy": 0.0958,
+              "n": 150
+            },
+            {
+              "step": 12,
+              "mean_entropy": 1.8753,
+              "ci95_entropy": 0.1137,
+              "n": 121
+            },
+            {
+              "step": 13,
+              "mean_entropy": 1.6109,
+              "ci95_entropy": 0.0807,
+              "n": 121
+            },
+            {
+              "step": 14,
+              "mean_entropy": 1.1243,
+              "ci95_entropy": 0.0631,
+              "n": 103
+            },
+            {
+              "step": 15,
+              "mean_entropy": 1.0402,
+              "ci95_entropy": 0.0788,
+              "n": 79
+            },
+            {
+              "step": 16,
+              "mean_entropy": 1.1722,
+              "ci95_entropy": 0.049,
+              "n": 79
+            },
+            {
+              "step": 17,
+              "mean_entropy": 1.1805,
+              "ci95_entropy": 0.0526,
+              "n": 79
+            },
+            {
+              "step": 18,
+              "mean_entropy": 1.4455,
+              "ci95_entropy": 0.1071,
+              "n": 79
+            },
+            {
+              "step": 19,
+              "mean_entropy": 1.515,
+              "ci95_entropy": 0.1769,
+              "n": 79
+            },
+            {
+              "step": 20,
+              "mean_entropy": 1.6347,
+              "ci95_entropy": 0.1507,
+              "n": 79
+            },
+            {
+              "step": 21,
+              "mean_entropy": 1.6297,
+              "ci95_entropy": 0.1499,
+              "n": 79
+            },
+            {
+              "step": 22,
+              "mean_entropy": 1.2394,
+              "ci95_entropy": 0.1892,
+              "n": 60
+            },
+            {
+              "step": 23,
+              "mean_entropy": 1.2274,
+              "ci95_entropy": 0.1928,
+              "n": 60
+            },
+            {
+              "step": 24,
+              "mean_entropy": 1.2274,
+              "ci95_entropy": 0.1928,
+              "n": 60
+            },
+            {
+              "step": 25,
+              "mean_entropy": 0.7581,
+              "ci95_entropy": 0.2753,
+              "n": 60
+            },
+            {
+              "step": 26,
+              "mean_entropy": 1.2486,
+              "ci95_entropy": 0.1905,
+              "n": 60
+            },
+            {
+              "step": 27,
+              "mean_entropy": 1.0039,
+              "ci95_entropy": 0.0646,
+              "n": 41
+            },
+            {
+              "step": 28,
+              "mean_entropy": 1.0039,
+              "ci95_entropy": 0.0646,
+              "n": 41
+            },
+            {
+              "step": 29,
+              "mean_entropy": 1.0039,
+              "ci95_entropy": 0.0646,
+              "n": 41
+            },
+            {
+              "step": 30,
+              "mean_entropy": 0.7219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 31,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 32,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 33,
+              "mean_entropy": 0.7219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 34,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 35,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 36,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 37,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 38,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 39,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 40,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 41,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 42,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 43,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 33
+            },
+            {
+              "step": 44,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 33
+            },
+            {
+              "step": 45,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 33
+            },
+            {
+              "step": 46,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 33
+            },
+            {
+              "step": 47,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 33
+            },
+            {
+              "step": 48,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 27
+            },
+            {
+              "step": 49,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 27
+            },
+            {
+              "step": 50,
+              "mean_entropy": 1.5219,
+              "ci95_entropy": 0.0,
+              "n": 16
+            },
+            {
+              "step": 51,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 16
+            },
+            {
+              "step": 52,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 6
+            }
+          ],
+          "phase_arrival_steps": {
+            "ScanNetwork": {
+              "reached_episodes": 150,
+              "median_step": 5.0,
+              "iqr_steps": 0.0,
+              "mean_step": 5.0
+            },
+            "FindServices": {
+              "reached_episodes": 150,
+              "median_step": 3.0,
+              "iqr_steps": 0.0,
+              "mean_step": 3.0
+            },
+            "ExploitService": {
+              "reached_episodes": 150,
+              "median_step": 8.0,
+              "iqr_steps": 18.0,
+              "mean_step": 12.81
+            },
+            "FindData": {
+              "reached_episodes": 150,
+              "median_step": 1.0,
+              "iqr_steps": 0.0,
+              "mean_step": 1.0
+            },
+            "ExfiltrateData": {
+              "reached_episodes": 150,
+              "median_step": 2.0,
+              "iqr_steps": 0.0,
+              "mean_step": 2.0
+            }
+          }
+        },
         "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth": {
           "mean_entropy_bits": 1.4683,
           "entropy_trajectory": [
@@ -3962,6 +4333,28 @@
             "cliffs_delta": 0.1671
           }
         },
+        "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth__vs__Ablation_PureHeuristic_WithStealth": {
+          "mcnemar_win": {
+            "n_paired": 150,
+            "a_only_wins": 13,
+            "b_only_wins": 12,
+            "p_value": 1.0
+          },
+          "wilcoxon_return": {
+            "n_paired": 150,
+            "mean_a": 46.547,
+            "mean_b": 50.44,
+            "p_value": 0.001302,
+            "cliffs_delta": -0.1883
+          },
+          "wilcoxon_steps": {
+            "n_paired": 150,
+            "mean_a": 21.92,
+            "mean_b": 17.293,
+            "p_value": 2e-06,
+            "cliffs_delta": 0.2544
+          }
+        },
         "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth__vs__Ablation_SLM_7B_NF4_RawReAct": {
           "mcnemar_win": {
             "n_paired": 150,
@@ -4008,6 +4401,349 @@
         }
       },
       "entropy_and_phases": {
+        "Ablation_PureHeuristic_WithStealth": {
+          "mean_entropy_bits": 1.6173,
+          "entropy_trajectory": [
+            {
+              "step": 1,
+              "mean_entropy": 0.0,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 2,
+              "mean_entropy": 1.0,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 3,
+              "mean_entropy": 1.585,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 4,
+              "mean_entropy": 1.5,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 5,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 6,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 7,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 146
+            },
+            {
+              "step": 8,
+              "mean_entropy": 2.2205,
+              "ci95_entropy": 0.0291,
+              "n": 138
+            },
+            {
+              "step": 9,
+              "mean_entropy": 2.1369,
+              "ci95_entropy": 0.0573,
+              "n": 134
+            },
+            {
+              "step": 10,
+              "mean_entropy": 2.1172,
+              "ci95_entropy": 0.0666,
+              "n": 132
+            },
+            {
+              "step": 11,
+              "mean_entropy": 2.0404,
+              "ci95_entropy": 0.0939,
+              "n": 131
+            },
+            {
+              "step": 12,
+              "mean_entropy": 2.0149,
+              "ci95_entropy": 0.1063,
+              "n": 110
+            },
+            {
+              "step": 13,
+              "mean_entropy": 1.7301,
+              "ci95_entropy": 0.0739,
+              "n": 107
+            },
+            {
+              "step": 14,
+              "mean_entropy": 1.2132,
+              "ci95_entropy": 0.0617,
+              "n": 87
+            },
+            {
+              "step": 15,
+              "mean_entropy": 1.137,
+              "ci95_entropy": 0.091,
+              "n": 59
+            },
+            {
+              "step": 16,
+              "mean_entropy": 1.2337,
+              "ci95_entropy": 0.0562,
+              "n": 59
+            },
+            {
+              "step": 17,
+              "mean_entropy": 1.2425,
+              "ci95_entropy": 0.062,
+              "n": 58
+            },
+            {
+              "step": 18,
+              "mean_entropy": 1.5845,
+              "ci95_entropy": 0.1208,
+              "n": 58
+            },
+            {
+              "step": 19,
+              "mean_entropy": 1.7649,
+              "ci95_entropy": 0.1986,
+              "n": 57
+            },
+            {
+              "step": 20,
+              "mean_entropy": 1.8753,
+              "ci95_entropy": 0.171,
+              "n": 55
+            },
+            {
+              "step": 21,
+              "mean_entropy": 1.868,
+              "ci95_entropy": 0.1703,
+              "n": 55
+            },
+            {
+              "step": 22,
+              "mean_entropy": 1.5422,
+              "ci95_entropy": 0.2773,
+              "n": 32
+            },
+            {
+              "step": 23,
+              "mean_entropy": 1.5728,
+              "ci95_entropy": 0.2985,
+              "n": 30
+            },
+            {
+              "step": 24,
+              "mean_entropy": 1.6022,
+              "ci95_entropy": 0.3032,
+              "n": 29
+            },
+            {
+              "step": 25,
+              "mean_entropy": 1.3283,
+              "ci95_entropy": 0.4182,
+              "n": 29
+            },
+            {
+              "step": 26,
+              "mean_entropy": 1.6791,
+              "ci95_entropy": 0.2917,
+              "n": 28
+            },
+            {
+              "step": 27,
+              "mean_entropy": 1.0835,
+              "ci95_entropy": 0.2207,
+              "n": 12
+            },
+            {
+              "step": 28,
+              "mean_entropy": 1.0835,
+              "ci95_entropy": 0.2207,
+              "n": 12
+            },
+            {
+              "step": 29,
+              "mean_entropy": 1.0938,
+              "ci95_entropy": 0.2407,
+              "n": 11
+            },
+            {
+              "step": 30,
+              "mean_entropy": 0.7219,
+              "ci95_entropy": 0.0,
+              "n": 10
+            },
+            {
+              "step": 31,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 9
+            },
+            {
+              "step": 32,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 9
+            },
+            {
+              "step": 33,
+              "mean_entropy": 0.7219,
+              "ci95_entropy": 0.0,
+              "n": 9
+            },
+            {
+              "step": 34,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 7
+            },
+            {
+              "step": 35,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 7
+            },
+            {
+              "step": 36,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 7
+            },
+            {
+              "step": 37,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 7
+            },
+            {
+              "step": 38,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 7
+            },
+            {
+              "step": 39,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 7
+            },
+            {
+              "step": 40,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 6
+            },
+            {
+              "step": 41,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 6
+            },
+            {
+              "step": 42,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 6
+            },
+            {
+              "step": 43,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 4
+            },
+            {
+              "step": 44,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 4
+            },
+            {
+              "step": 45,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 4
+            },
+            {
+              "step": 46,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 4
+            },
+            {
+              "step": 47,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 4
+            },
+            {
+              "step": 48,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 3
+            },
+            {
+              "step": 49,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 3
+            },
+            {
+              "step": 50,
+              "mean_entropy": 1.5219,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 51,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            }
+          ],
+          "phase_arrival_steps": {
+            "ScanNetwork": {
+              "reached_episodes": 150,
+              "median_step": 5.0,
+              "iqr_steps": 0.0,
+              "mean_step": 5.0
+            },
+            "FindServices": {
+              "reached_episodes": 150,
+              "median_step": 3.0,
+              "iqr_steps": 0.0,
+              "mean_step": 3.0
+            },
+            "ExploitService": {
+              "reached_episodes": 115,
+              "median_step": 8.0,
+              "iqr_steps": 0.0,
+              "mean_step": 9.74
+            },
+            "FindData": {
+              "reached_episodes": 150,
+              "median_step": 1.0,
+              "iqr_steps": 0.0,
+              "mean_step": 1.0
+            },
+            "ExfiltrateData": {
+              "reached_episodes": 150,
+              "median_step": 2.0,
+              "iqr_steps": 0.0,
+              "mean_step": 2.0
+            }
+          }
+        },
         "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth": {
           "mean_entropy_bits": 1.4184,
           "entropy_trajectory": [
@@ -7476,6 +8212,28 @@
             "cliffs_delta": -0.0083
           }
         },
+        "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth__vs__Ablation_PureHeuristic_WithStealth": {
+          "mcnemar_win": {
+            "n_paired": 150,
+            "a_only_wins": 12,
+            "b_only_wins": 8,
+            "p_value": 0.503445
+          },
+          "wilcoxon_return": {
+            "n_paired": 150,
+            "mean_a": 53.153,
+            "mean_b": 59.44,
+            "p_value": 0.0,
+            "cliffs_delta": -0.3598
+          },
+          "wilcoxon_steps": {
+            "n_paired": 150,
+            "mean_a": 39.513,
+            "mean_b": 30.293,
+            "p_value": 0.0,
+            "cliffs_delta": 0.3598
+          }
+        },
         "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth__vs__Ablation_SLM_7B_NF4_RawReAct": {
           "mcnemar_win": {
             "n_paired": 150,
@@ -7522,6 +8280,643 @@
         }
       },
       "entropy_and_phases": {
+        "Ablation_PureHeuristic_WithStealth": {
+          "mean_entropy_bits": 1.5522,
+          "entropy_trajectory": [
+            {
+              "step": 1,
+              "mean_entropy": 0.0,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 2,
+              "mean_entropy": 1.0,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 3,
+              "mean_entropy": 1.585,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 4,
+              "mean_entropy": 1.5,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 5,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 6,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 7,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 8,
+              "mean_entropy": 2.2126,
+              "ci95_entropy": 0.0286,
+              "n": 150
+            },
+            {
+              "step": 9,
+              "mean_entropy": 2.1033,
+              "ci95_entropy": 0.0572,
+              "n": 150
+            },
+            {
+              "step": 10,
+              "mean_entropy": 2.0657,
+              "ci95_entropy": 0.0675,
+              "n": 150
+            },
+            {
+              "step": 11,
+              "mean_entropy": 1.959,
+              "ci95_entropy": 0.0958,
+              "n": 150
+            },
+            {
+              "step": 12,
+              "mean_entropy": 1.8964,
+              "ci95_entropy": 0.1096,
+              "n": 127
+            },
+            {
+              "step": 13,
+              "mean_entropy": 1.6256,
+              "ci95_entropy": 0.0777,
+              "n": 127
+            },
+            {
+              "step": 14,
+              "mean_entropy": 1.1194,
+              "ci95_entropy": 0.064,
+              "n": 101
+            },
+            {
+              "step": 15,
+              "mean_entropy": 1.0443,
+              "ci95_entropy": 0.0783,
+              "n": 80
+            },
+            {
+              "step": 16,
+              "mean_entropy": 1.1747,
+              "ci95_entropy": 0.0486,
+              "n": 80
+            },
+            {
+              "step": 17,
+              "mean_entropy": 1.1828,
+              "ci95_entropy": 0.0521,
+              "n": 80
+            },
+            {
+              "step": 18,
+              "mean_entropy": 1.4514,
+              "ci95_entropy": 0.1064,
+              "n": 80
+            },
+            {
+              "step": 19,
+              "mean_entropy": 1.525,
+              "ci95_entropy": 0.1758,
+              "n": 80
+            },
+            {
+              "step": 20,
+              "mean_entropy": 1.6433,
+              "ci95_entropy": 0.1498,
+              "n": 80
+            },
+            {
+              "step": 21,
+              "mean_entropy": 1.6383,
+              "ci95_entropy": 0.149,
+              "n": 80
+            },
+            {
+              "step": 22,
+              "mean_entropy": 1.2727,
+              "ci95_entropy": 0.1924,
+              "n": 61
+            },
+            {
+              "step": 23,
+              "mean_entropy": 1.2609,
+              "ci95_entropy": 0.1959,
+              "n": 61
+            },
+            {
+              "step": 24,
+              "mean_entropy": 1.2609,
+              "ci95_entropy": 0.1959,
+              "n": 61
+            },
+            {
+              "step": 25,
+              "mean_entropy": 0.7994,
+              "ci95_entropy": 0.2792,
+              "n": 61
+            },
+            {
+              "step": 26,
+              "mean_entropy": 1.2727,
+              "ci95_entropy": 0.1924,
+              "n": 61
+            },
+            {
+              "step": 27,
+              "mean_entropy": 1.436,
+              "ci95_entropy": 0.1624,
+              "n": 61
+            },
+            {
+              "step": 28,
+              "mean_entropy": 1.436,
+              "ci95_entropy": 0.1624,
+              "n": 61
+            },
+            {
+              "step": 29,
+              "mean_entropy": 1.436,
+              "ci95_entropy": 0.1624,
+              "n": 61
+            },
+            {
+              "step": 30,
+              "mean_entropy": 1.2727,
+              "ci95_entropy": 0.1924,
+              "n": 61
+            },
+            {
+              "step": 31,
+              "mean_entropy": 1.436,
+              "ci95_entropy": 0.1624,
+              "n": 61
+            },
+            {
+              "step": 32,
+              "mean_entropy": 1.1472,
+              "ci95_entropy": 0.1329,
+              "n": 46
+            },
+            {
+              "step": 33,
+              "mean_entropy": 0.9306,
+              "ci95_entropy": 0.1574,
+              "n": 46
+            },
+            {
+              "step": 34,
+              "mean_entropy": 1.495,
+              "ci95_entropy": 0.0936,
+              "n": 46
+            },
+            {
+              "step": 35,
+              "mean_entropy": 1.9741,
+              "ci95_entropy": 0.0394,
+              "n": 46
+            },
+            {
+              "step": 36,
+              "mean_entropy": 1.9741,
+              "ci95_entropy": 0.0394,
+              "n": 46
+            },
+            {
+              "step": 37,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 38,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 39,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 40,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 40
+            },
+            {
+              "step": 41,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 34
+            },
+            {
+              "step": 42,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 34
+            },
+            {
+              "step": 43,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 34
+            },
+            {
+              "step": 44,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 34
+            },
+            {
+              "step": 45,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 34
+            },
+            {
+              "step": 46,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 29
+            },
+            {
+              "step": 47,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 29
+            },
+            {
+              "step": 48,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 23
+            },
+            {
+              "step": 49,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 50,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 51,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 52,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 53,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 54,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 55,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 56,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 57,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 58,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 59,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 60,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 61,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 62,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 63,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 64,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 65,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 66,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 67,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 68,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 69,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 70,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 71,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 72,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 73,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 74,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 75,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 76,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 77,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 78,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 79,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 80,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 81,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 82,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 83,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 84,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 85,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 86,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 87,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 88,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 89,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 90,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 91,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 92,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 93,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 94,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 95,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 96,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 97,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 98,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 99,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 14
+            },
+            {
+              "step": 100,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 14
+            }
+          ],
+          "phase_arrival_steps": {
+            "ScanNetwork": {
+              "reached_episodes": 150,
+              "median_step": 5.0,
+              "iqr_steps": 0.0,
+              "mean_step": 5.0
+            },
+            "FindServices": {
+              "reached_episodes": 150,
+              "median_step": 3.0,
+              "iqr_steps": 0.0,
+              "mean_step": 3.0
+            },
+            "ExploitService": {
+              "reached_episodes": 150,
+              "median_step": 8.0,
+              "iqr_steps": 18.0,
+              "mean_step": 12.81
+            },
+            "FindData": {
+              "reached_episodes": 150,
+              "median_step": 1.0,
+              "iqr_steps": 0.0,
+              "mean_step": 1.0
+            },
+            "ExfiltrateData": {
+              "reached_episodes": 150,
+              "median_step": 2.0,
+              "iqr_steps": 0.0,
+              "mean_step": 2.0
+            }
+          }
+        },
         "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth": {
           "mean_entropy_bits": 1.4782,
           "entropy_trajectory": [
@@ -11392,6 +12787,28 @@
             "cliffs_delta": 0.2337
           }
         },
+        "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth__vs__Ablation_PureHeuristic_WithStealth": {
+          "mcnemar_win": {
+            "n_paired": 150,
+            "a_only_wins": 14,
+            "b_only_wins": 16,
+            "p_value": 0.855536
+          },
+          "wilcoxon_return": {
+            "n_paired": 150,
+            "mean_a": 32.773,
+            "mean_b": 43.607,
+            "p_value": 1.1e-05,
+            "cliffs_delta": -0.2774
+          },
+          "wilcoxon_steps": {
+            "n_paired": 150,
+            "mean_a": 27.627,
+            "mean_b": 18.26,
+            "p_value": 0.0,
+            "cliffs_delta": 0.3884
+          }
+        },
         "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth__vs__Ablation_SLM_7B_NF4_RawReAct": {
           "mcnemar_win": {
             "n_paired": 150,
@@ -11438,6 +12855,643 @@
         }
       },
       "entropy_and_phases": {
+        "Ablation_PureHeuristic_WithStealth": {
+          "mean_entropy_bits": 1.6424,
+          "entropy_trajectory": [
+            {
+              "step": 1,
+              "mean_entropy": 0.0,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 2,
+              "mean_entropy": 1.0,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 3,
+              "mean_entropy": 1.585,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 4,
+              "mean_entropy": 1.5,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 5,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 6,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 150
+            },
+            {
+              "step": 7,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 148
+            },
+            {
+              "step": 8,
+              "mean_entropy": 2.216,
+              "ci95_entropy": 0.0298,
+              "n": 136
+            },
+            {
+              "step": 9,
+              "mean_entropy": 2.1234,
+              "ci95_entropy": 0.0589,
+              "n": 133
+            },
+            {
+              "step": 10,
+              "mean_entropy": 2.1011,
+              "ci95_entropy": 0.0687,
+              "n": 131
+            },
+            {
+              "step": 11,
+              "mean_entropy": 2.0422,
+              "ci95_entropy": 0.0951,
+              "n": 127
+            },
+            {
+              "step": 12,
+              "mean_entropy": 1.9842,
+              "ci95_entropy": 0.113,
+              "n": 104
+            },
+            {
+              "step": 13,
+              "mean_entropy": 1.695,
+              "ci95_entropy": 0.0799,
+              "n": 103
+            },
+            {
+              "step": 14,
+              "mean_entropy": 1.2056,
+              "ci95_entropy": 0.0642,
+              "n": 83
+            },
+            {
+              "step": 15,
+              "mean_entropy": 1.1484,
+              "ci95_entropy": 0.0875,
+              "n": 62
+            },
+            {
+              "step": 16,
+              "mean_entropy": 1.2403,
+              "ci95_entropy": 0.054,
+              "n": 62
+            },
+            {
+              "step": 17,
+              "mean_entropy": 1.2515,
+              "ci95_entropy": 0.0605,
+              "n": 59
+            },
+            {
+              "step": 18,
+              "mean_entropy": 1.6063,
+              "ci95_entropy": 0.1178,
+              "n": 59
+            },
+            {
+              "step": 19,
+              "mean_entropy": 1.8021,
+              "ci95_entropy": 0.1935,
+              "n": 58
+            },
+            {
+              "step": 20,
+              "mean_entropy": 1.9244,
+              "ci95_entropy": 0.1658,
+              "n": 55
+            },
+            {
+              "step": 21,
+              "mean_entropy": 1.9171,
+              "ci95_entropy": 0.1651,
+              "n": 55
+            },
+            {
+              "step": 22,
+              "mean_entropy": 1.616,
+              "ci95_entropy": 0.2711,
+              "n": 34
+            },
+            {
+              "step": 23,
+              "mean_entropy": 1.6213,
+              "ci95_entropy": 0.2859,
+              "n": 33
+            },
+            {
+              "step": 24,
+              "mean_entropy": 1.6213,
+              "ci95_entropy": 0.2859,
+              "n": 33
+            },
+            {
+              "step": 25,
+              "mean_entropy": 1.3369,
+              "ci95_entropy": 0.3976,
+              "n": 33
+            },
+            {
+              "step": 26,
+              "mean_entropy": 1.7026,
+              "ci95_entropy": 0.2789,
+              "n": 31
+            },
+            {
+              "step": 27,
+              "mean_entropy": 1.799,
+              "ci95_entropy": 0.2355,
+              "n": 31
+            },
+            {
+              "step": 28,
+              "mean_entropy": 1.9582,
+              "ci95_entropy": 0.2349,
+              "n": 26
+            },
+            {
+              "step": 29,
+              "mean_entropy": 1.9582,
+              "ci95_entropy": 0.2349,
+              "n": 26
+            },
+            {
+              "step": 30,
+              "mean_entropy": 1.8912,
+              "ci95_entropy": 0.2782,
+              "n": 26
+            },
+            {
+              "step": 31,
+              "mean_entropy": 1.9582,
+              "ci95_entropy": 0.2349,
+              "n": 26
+            },
+            {
+              "step": 32,
+              "mean_entropy": 1.5339,
+              "ci95_entropy": 0.3936,
+              "n": 12
+            },
+            {
+              "step": 33,
+              "mean_entropy": 1.4492,
+              "ci95_entropy": 0.4938,
+              "n": 11
+            },
+            {
+              "step": 34,
+              "mean_entropy": 1.8464,
+              "ci95_entropy": 0.3107,
+              "n": 10
+            },
+            {
+              "step": 35,
+              "mean_entropy": 2.1219,
+              "ci95_entropy": 0.1307,
+              "n": 10
+            },
+            {
+              "step": 36,
+              "mean_entropy": 2.1219,
+              "ci95_entropy": 0.1307,
+              "n": 10
+            },
+            {
+              "step": 37,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 5
+            },
+            {
+              "step": 38,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 4
+            },
+            {
+              "step": 39,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 4
+            },
+            {
+              "step": 40,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 4
+            },
+            {
+              "step": 41,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 3
+            },
+            {
+              "step": 42,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 3
+            },
+            {
+              "step": 43,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 3
+            },
+            {
+              "step": 44,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 3
+            },
+            {
+              "step": 45,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 3
+            },
+            {
+              "step": 46,
+              "mean_entropy": 2.3219,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 47,
+              "mean_entropy": 1.9219,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 48,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 49,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 50,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 51,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 52,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 53,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 54,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 55,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 56,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 57,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 58,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 59,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 60,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 61,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 62,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 63,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 64,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 65,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 66,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 67,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 68,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 69,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 70,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 2
+            },
+            {
+              "step": 71,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 72,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 73,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 74,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 75,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 76,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 77,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 78,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 79,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 80,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 81,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 82,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 83,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 84,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 85,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 86,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 87,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 88,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 89,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 90,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 91,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 92,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 93,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 94,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 95,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 96,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 97,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 98,
+              "mean_entropy": 1.371,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 99,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 1
+            },
+            {
+              "step": 100,
+              "mean_entropy": 0.971,
+              "ci95_entropy": 0.0,
+              "n": 1
+            }
+          ],
+          "phase_arrival_steps": {
+            "ScanNetwork": {
+              "reached_episodes": 150,
+              "median_step": 5.0,
+              "iqr_steps": 0.0,
+              "mean_step": 5.0
+            },
+            "FindServices": {
+              "reached_episodes": 150,
+              "median_step": 3.0,
+              "iqr_steps": 0.0,
+              "mean_step": 3.0
+            },
+            "ExploitService": {
+              "reached_episodes": 113,
+              "median_step": 8.0,
+              "iqr_steps": 0.0,
+              "mean_step": 9.93
+            },
+            "FindData": {
+              "reached_episodes": 150,
+              "median_step": 1.0,
+              "iqr_steps": 0.0,
+              "mean_step": 1.0
+            },
+            "ExfiltrateData": {
+              "reached_episodes": 150,
+              "median_step": 2.0,
+              "iqr_steps": 0.0,
+              "mean_step": 2.0
+            }
+          }
+        },
         "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth": {
           "mean_entropy_bits": 1.4311,
           "entropy_trajectory": [
