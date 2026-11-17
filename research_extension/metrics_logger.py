@@ -54,6 +54,8 @@ class StepMetric:
     detected: bool = False
     raw_action_str: str = ""
     raw_slm_valid: bool = True
+    first_pass_valid: bool = True
+    post_reflexion_valid: bool = True
     was_overridden: bool = False
     stealth_risk_score: float = 0.0
     stealth_deferred_count: int = 0
@@ -75,12 +77,16 @@ class EpisodeMetric:
     invalid_actions: int = 0
     redundant_actions: int = 0
     raw_slm_valid_count: int = 0
+    first_pass_valid_count: int = 0
+    post_reflexion_valid_count: int = 0
     override_count: int = 0
     total_stealth_risk: float = 0.0
     total_stealth_deferred: int = 0
     total_latency_ms: float = 0.0
     total_tokens: int = 0
     raw_slm_valid_rate_percent: float = 0.0
+    first_pass_valid_rate_percent: float = 0.0
+    post_reflexion_valid_rate_percent: float = 0.0
     override_rate_percent: float = 0.0
     mean_stealth_risk: float = 0.0
     steps: List[StepMetric] = field(default_factory=list)
@@ -119,6 +125,8 @@ class MetricsLogger:
         detected: bool = False,
         raw_action_str: str = "",
         raw_slm_valid: bool = True,
+        first_pass_valid: Optional[bool] = None,
+        post_reflexion_valid: Optional[bool] = None,
         was_overridden: bool = False,
         stealth_risk_score: float = 0.0,
         stealth_deferred_count: int = 0,
@@ -127,6 +135,8 @@ class MetricsLogger:
         if self._current_episode is None:
             raise RuntimeError("start_episode() must be called before record_step().")
 
+        fpv = bool(raw_slm_valid) if first_pass_valid is None else bool(first_pass_valid)
+        prv = bool(raw_slm_valid) if post_reflexion_valid is None else bool(post_reflexion_valid)
         step = StepMetric(
             episode_id=self._current_episode.episode_id,
             step_num=step_num,
@@ -141,6 +151,8 @@ class MetricsLogger:
             detected=bool(detected),
             raw_action_str=raw_action_str,
             raw_slm_valid=bool(raw_slm_valid),
+            first_pass_valid=fpv,
+            post_reflexion_valid=prv,
             was_overridden=bool(was_overridden),
             stealth_risk_score=float(stealth_risk_score),
             stealth_deferred_count=int(stealth_deferred_count),
@@ -161,6 +173,10 @@ class MetricsLogger:
             ep.redundant_actions += 1
         if raw_slm_valid:
             ep.raw_slm_valid_count += 1
+        if fpv:
+            ep.first_pass_valid_count += 1
+        if prv:
+            ep.post_reflexion_valid_count += 1
         if was_overridden:
             ep.override_count += 1
 
@@ -176,6 +192,8 @@ class MetricsLogger:
 
         if ep.steps_taken > 0:
             ep.raw_slm_valid_rate_percent = round(100.0 * ep.raw_slm_valid_count / ep.steps_taken, 2)
+            ep.first_pass_valid_rate_percent = round(100.0 * ep.first_pass_valid_count / ep.steps_taken, 2)
+            ep.post_reflexion_valid_rate_percent = round(100.0 * ep.post_reflexion_valid_count / ep.steps_taken, 2)
             ep.override_rate_percent = round(100.0 * ep.override_count / ep.steps_taken, 2)
             ep.mean_stealth_risk = round(ep.total_stealth_risk / ep.steps_taken, 4)
 
@@ -209,6 +227,8 @@ class MetricsLogger:
         total_latency = sum(e.total_latency_ms for e in self.episodes)
         total_tokens = sum(e.total_tokens for e in self.episodes)
         total_raw_valid = sum(e.raw_slm_valid_count for e in self.episodes)
+        total_first_pass = sum(e.first_pass_valid_count for e in self.episodes)
+        total_post_reflexion = sum(e.post_reflexion_valid_count for e in self.episodes)
         total_overrides = sum(e.override_count for e in self.episodes)
         total_stealth = sum(e.total_stealth_risk for e in self.episodes)
 
@@ -217,6 +237,8 @@ class MetricsLogger:
         _, stl_sd, stl_ci = _compute_stats(stealth_vals)
 
         raw_valid_micro = (100.0 * total_raw_valid / total_steps) if total_steps > 0 else 0.0
+        first_pass_micro = (100.0 * total_first_pass / total_steps) if total_steps > 0 else 0.0
+        post_reflexion_micro = (100.0 * total_post_reflexion / total_steps) if total_steps > 0 else 0.0
         override_micro = (100.0 * total_overrides / total_steps) if total_steps > 0 else 0.0
         stealth_micro = (total_stealth / total_steps) if total_steps > 0 else 0.0
 
@@ -241,6 +263,8 @@ class MetricsLogger:
             "raw_slm_valid_rate_percent": round(raw_valid_micro, 2),
             "raw_slm_valid_rate_sd": round(raw_sd, 2),
             "raw_slm_valid_rate_ci95": round(raw_ci, 2),
+            "first_pass_valid_rate_percent": round(first_pass_micro, 2),
+            "post_reflexion_valid_rate_percent": round(post_reflexion_micro, 2),
             "wrapper_override_rate_percent": round(override_micro, 2),
             "wrapper_override_rate_sd": round(ovr_sd, 2),
             "wrapper_override_rate_ci95": round(ovr_ci, 2),
@@ -275,6 +299,32 @@ class MetricsLogger:
         with open(path, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, indent=2)
         return path
+
+    def append_episode_jsonl(self, ep: EpisodeMetric, jsonl_path: Path) -> None:
+        """Flush a single completed episode (with step trace) to JSONL for crash-safe resume."""
+        with open(jsonl_path, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(asdict(ep)) + "\n")
+            fh.flush()
+
+    def load_episodes_jsonl(self, jsonl_path: Path) -> int:
+        """Load previously flushed episodes from JSONL and return the count loaded."""
+        if not jsonl_path.exists():
+            return 0
+        loaded: Dict[int, EpisodeMetric] = {}
+        with open(jsonl_path, "r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    raw = json.loads(line)
+                    steps = [StepMetric(**st) for st in raw.pop("steps", [])]
+                    ep = EpisodeMetric(**raw, steps=steps)
+                    loaded[ep.episode_id] = ep
+                except Exception:
+                    continue
+        self.episodes = [loaded[k] for k in sorted(loaded.keys())]
+        return len(self.episodes)
 
     def export_csv(self, filename: Optional[str] = None) -> Path:
         """Write episode-level summary CSV and granular step-level trace CSV."""
@@ -319,6 +369,8 @@ class MetricsLogger:
             "valid_action",
             "redundant_action",
             "raw_slm_valid",
+            "first_pass_valid",
+            "post_reflexion_valid",
             "was_overridden",
             "stealth_risk_score",
             "stealth_deferred_count",

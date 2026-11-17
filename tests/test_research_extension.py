@@ -224,8 +224,16 @@ def test_attacker_autonomy_and_config_b_no_override() -> None:
     assert agent_b.last_decision_metadata["raw_slm_valid"] is False
     assert agent_b.last_decision_metadata["was_overridden"] is False
 
-    # 3. Masked agent with invalid text or missing required parameter DOES trigger domain-agnostic fallback.
-    agent_c = ModernSLMAttacker(cfg_a, MockSLMBackend(["broken output", '{"action": "FindServices", "parameters": {"source_host": "172.16.44.10"}}']))
+    # 3. Masked agent with invalid text or missing required parameter DOES trigger 1-step reflexion then fallback.
+    agent_c = ModernSLMAttacker(
+        cfg_a,
+        MockSLMBackend([
+            "broken output",
+            "still broken",
+            '{"action": "FindServices", "parameters": {"source_host": "172.16.44.10"}}',
+            '{"action": "FindServices", "parameters": {"source_host": "172.16.44.10"}}',
+        ]),
+    )
     act_c, _, _, _ = agent_c.plan_next_action(obs)
     assert act_c is not None
     assert agent_c.last_decision_metadata["raw_slm_valid"] is False
@@ -320,3 +328,81 @@ def test_depth_first_interleaved_streak_breaking() -> None:
     # Depth-First Kill-Chain Locality: FindData (tier 1) precedes ExploitService (tier 2)
     assert actions[0]["action"] == "FindData"
     assert actions[1]["action"] == "ExploitService"
+
+
+def test_exfiltrate_window_frequency_spacing() -> None:
+    """Verify ExfiltrateData is flagged high-risk if executed within the last W=5 steps."""
+    sem = SemanticMemoryStore(stealth_window=5, enable_stealth_pacing=True)
+    assert sem.is_action_high_stealth_risk("ExfiltrateData") is False
+
+    # After 1 ExfiltrateData, executing another within W=5 steps is deferred
+    sem.record_action_outcome(
+        "ExfiltrateData", {"source_host": "172.16.44.20", "target_host": "172.16.44.10"}, "success"
+    )
+    assert sem.is_action_high_stealth_risk("ExfiltrateData") is True
+
+    # After 4 non-ExfiltrateData steps (5th step in window is still ExfiltrateData), still flagged
+    for _ in range(4):
+        sem.record_action_outcome("FindData", {"source_host": "172.16.44.20", "target_host": "172.16.44.20"}, "success")
+    assert sem.is_action_high_stealth_risk("ExfiltrateData") is True
+
+    # After a 5th non-ExfiltrateData step, ExfiltrateData leaves the W=5 history window
+    sem.record_action_outcome("FindData", {"source_host": "172.16.44.20", "target_host": "172.16.44.20"}, "success")
+    assert sem.is_action_high_stealth_risk("ExfiltrateData") is False
+
+
+def test_first_json_object_stopping_criteria() -> None:
+    """Verify balanced JSON object detection handles nested braces and string literals."""
+    from research_extension.slm_backend import FirstJsonObjectStoppingCriteria
+
+    assert FirstJsonObjectStoppingCriteria.has_complete_json_object('{"action": "ScanNetwork", ') is False
+    assert FirstJsonObjectStoppingCriteria.has_complete_json_object('{"action": "ScanNetwork", "parameters": {"a": "}"}}') is True
+
+
+def test_multiscale_minimax_hazard_utility() -> None:
+    """Verify U(a) ranks depth-first non-bursty actions ahead of streak-breaking bursts."""
+    sem = SemanticMemoryStore(stealth_window=5, enable_stealth_pacing=True)
+    sem.record_action_outcome(
+        "FindServices", {"source_host": "10.0.0.1", "target_host": "10.0.0.2"}, "success"
+    )
+    u_find, _, h_find = sem.compute_minimax_hazard_utility(
+        "FindServices", {"source_host": "10.0.0.1", "target_host": "10.0.0.3"}
+    )
+    u_exp, _, h_exp = sem.compute_minimax_hazard_utility(
+        "ExploitService", {"source_host": "10.0.0.1", "target_host": "10.0.0.2", "target_service": "ssh"}
+    )
+    assert h_find > h_exp
+    assert u_exp > u_find
+
+
+def test_one_step_counterfactual_reflexion() -> None:
+    """Verify invalid first JSON triggers 1-step reflexion and recovers without wrapper override."""
+    from netsecgame.game_components import GameState, IP, Network, Observation
+    from research_extension.agent_wrapper import ModernSLMAttacker
+    from research_extension.slm_backend import MockSLMBackend, SLMConfig
+
+    state = GameState(
+        controlled_hosts={IP("10.0.0.5")},
+        known_hosts={IP("10.0.0.5")},
+        known_networks={Network("10.0.0.0", 24)},
+        known_services={},
+        known_data={},
+        known_blocks={},
+    )
+    obs = Observation(state=state, reward=0.0, end=False, info={})
+    # First response is malformed JSON; second response (reflexion) is valid ScanNetwork
+    mock = MockSLMBackend(
+        scripted_responses=[
+            "INVALID NOT JSON",
+            '{"action": "ScanNetwork", "parameters": {"source_host": "10.0.0.5", "target_network": "10.0.0.0/24"}}',
+        ]
+    )
+    cfg = SLMConfig(backend="mock", use_memory=True, enable_action_masking=True, enable_stealth_pacing=True)
+    attacker = ModernSLMAttacker(config=cfg, backend=mock)
+    action, chosen, _, _ = attacker.plan_next_action(obs)
+    assert action is not None
+    assert chosen["action"] == "ScanNetwork"
+    assert attacker.last_decision_metadata["first_pass_valid"] is False
+    assert attacker.last_decision_metadata["post_reflexion_valid"] is True
+    assert attacker.last_decision_metadata["reflexion_triggered"] is True
+    assert attacker.last_decision_metadata["was_overridden"] is False

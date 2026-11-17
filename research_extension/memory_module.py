@@ -530,6 +530,88 @@ class SemanticMemoryStore:
             "window_len": float(len(history)),
         }
 
+    HAZARD_SCALES: Tuple[int, ...] = (3, 5, 8)
+    PROGRESS_GAIN_WEIGHTS: Dict[str, float] = {
+        "ExfiltrateData": 1.00,
+        "FindData": 0.80,
+        "ExploitService": 0.62,
+        "FindServices": 0.42,
+        "ScanNetwork": 0.22,
+    }
+
+    def compute_multiscale_hazard(
+        self,
+        action_type: str,
+        parameters: Optional[Dict[str, Any]] = None,
+        episodic_memory: Optional[EpisodicMemoryBuffer] = None,
+    ) -> float:
+        """
+        Compute worst-case normalized sliding-window hazard max_{w in {3,5,8}} R_w(a | H_t)
+        so the planner requires zero prior knowledge of the monitor's exact window W.
+        """
+        canon = canonicalize_action_type(action_type)
+        history = self._sync_history(episodic_memory)
+        max_hazard = 0.0
+
+        for w in self.HAZARD_SCALES:
+            next_window = (history[-(w - 1) :] if w > 1 else []) + [canon]
+            density_w = next_window.count(canon) / float(w)
+
+            consec_w = 0
+            for act in reversed(next_window):
+                if act == canon:
+                    consec_w += 1
+                else:
+                    break
+
+            if consec_w >= 3 or (consec_w >= 2 and canon in ("ScanNetwork", "ExfiltrateData", "FindData")):
+                consec_hazard = 1.0
+            elif consec_w >= 2:
+                consec_hazard = 0.55
+            else:
+                consec_hazard = 0.0
+
+            # ExfiltrateData spacing guard across window w
+            exfil_guard = 1.0 if (canon == "ExfiltrateData" and history[-w:].count("ExfiltrateData") >= 1) else 0.0
+            r_w = min(1.0, max(density_w, consec_hazard, exfil_guard))
+            if r_w > max_hazard:
+                max_hazard = r_w
+
+        if parameters is not None and self.is_action_redundant(canon, parameters):
+            max_hazard = min(1.0, max_hazard + 0.35)
+
+        return round(min(1.0, max(0.0, max_hazard)), 4)
+
+    def compute_minimax_hazard_utility(
+        self,
+        action_type: str,
+        parameters: Optional[Dict[str, Any]] = None,
+        episodic_memory: Optional[EpisodicMemoryBuffer] = None,
+        alpha: float = 1.0,
+        beta: float = 1.2,
+    ) -> Tuple[float, float, float]:
+        """
+        Evaluate U(a) = alpha * ProgressGain(a | G_t) - beta * max_{w in {3,5,8}} R_w(a | H_t).
+        Returns (utility, progress_gain, max_hazard).
+        """
+        canon = canonicalize_action_type(action_type)
+        p = parameters or {}
+        gain = self.PROGRESS_GAIN_WEIGHTS.get(canon, 0.10)
+        if canon == "ExfiltrateData" and self.goal_target_ip and p.get("target_host") == self.goal_target_ip:
+            gain += 0.08
+        elif canon == "FindServices":
+            th = p.get("target_host", "")
+            if th and th not in self.controlled_hosts and th not in self.probed_service_hosts:
+                gain += 0.06
+        if parameters is not None and self.is_action_redundant(canon, parameters):
+            gain -= 1.0
+
+        max_hazard = self.compute_multiscale_hazard(
+            canon, parameters=parameters, episodic_memory=episodic_memory
+        )
+        utility = round(alpha * gain - beta * max_hazard, 4)
+        return utility, round(gain, 4), max_hazard
+
     def score_action_stealth_risk(
         self,
         action_type: str,
@@ -537,43 +619,14 @@ class SemanticMemoryStore:
         episodic_memory: Optional[EpisodicMemoryBuffer] = None,
     ) -> float:
         """
-        Estimate normalized SIEM detection risk in [0.0, 1.0] for a candidate action
-        using sliding-window density d_t(a), consecutive streak c_t(a), and redundancy.
+        Estimate normalized multi-scale SIEM detection hazard in [0.0, 1.0]
+        via max_{w in {3,5,8}} R_w(a | H_t) and redundancy penalty.
         """
-        canon = canonicalize_action_type(action_type)
-        metrics = self.compute_temporal_metrics(canon, episodic_memory=episodic_memory)
-
-        projected_density = metrics["projected_density"]
-        projected_streak = metrics["projected_streak"]
-        episode_count = metrics["episode_count"]
-        window_len = metrics["window_len"]
-
-        risk = 0.0
-        # 1. Sliding-window density pressure (matches SIEM sliding-window thresholds).
-        if projected_density >= 0.60:
-            risk += 0.45
-        elif projected_density >= self.STEALTH_DENSITY_ALERT:
-            risk += 0.25
-        elif projected_density >= 0.20:
-            risk += 0.10
-
-        # 2. Consecutive same-type burst penalty (detectable burst behavior).
-        if projected_streak >= 3:
-            risk += 0.45
-        elif projected_streak >= self.CONSECUTIVE_STREAK_ALERT:
-            # FindServices has slightly higher consecutive burst tolerance than ScanNetwork/ExfiltrateData.
-            risk += 0.20 if canon == "FindServices" else 0.35
-
-        # 3. Episode-wide repetition pressure once warm-up window is active.
-        if window_len >= self.stealth_window and episode_count >= 2:
-            if canon in ("ExploitService", "FindData", "ScanNetwork", "ExfiltrateData"):
-                risk += 0.15
-
-        # 4. Exact repeat penalty (wasted noisy packet with zero information gain).
-        if parameters is not None and self.is_action_redundant(canon, parameters):
-            risk += 0.35
-
-        return round(min(1.0, max(0.0, risk)), 3)
+        return self.compute_multiscale_hazard(
+            action_type=action_type,
+            parameters=parameters,
+            episodic_memory=episodic_memory,
+        )
 
     def is_action_high_stealth_risk(
         self,
@@ -593,6 +646,10 @@ class SemanticMemoryStore:
         projected_density = next_window.count(canon) / float(w)
         ratio_thresh = self.SIEM_RATIO_THRESHOLDS.get(canon, 1.0)
         if projected_density >= ratio_thresh:
+            return True
+
+        # Frequency spacing for ExfiltrateData: avoid clustering >= 2 within last W steps
+        if canon == "ExfiltrateData" and history[-w:].count("ExfiltrateData") >= 1:
             return True
 
         consec_thresh = self.SIEM_CONSECUTIVE_THRESHOLDS.get(canon)
@@ -854,21 +911,14 @@ class SemanticMemoryStore:
         }
         recent_w = history[-self.stealth_window :]
 
-        def _schedule_key(cand: Dict[str, Any]) -> Tuple[int, int, int, float, str]:
+        def _schedule_key(cand: Dict[str, Any]) -> Tuple[float, int, str]:
             act = cand["action"]
             p = cand["parameters"]
+            utility, _, _ = self.compute_minimax_hazard_utility(
+                act, p, episodic_memory=episodic_memory
+            )
             tier = kill_chain_tier.get(act, 99)
-
-            sub_prio = 0
-            if act == "ExfiltrateData":
-                sub_prio = 0 if (self.goal_target_ip and p.get("target_host") == self.goal_target_ip) else 1
-            elif act == "FindServices":
-                th = p.get("target_host", "")
-                sub_prio = 0 if (th not in controlled_set and th not in self.probed_service_hosts) else 1
-
-            win_freq = recent_w.count(act)
-            risk = self.score_action_stealth_risk(act, p, episodic_memory=episodic_memory)
-            return (tier, sub_prio, win_freq, risk, str(sorted(p.items())))
+            return (-utility, tier, str(sorted(p.items())))
 
         return sorted(active_pool, key=_schedule_key)
 
