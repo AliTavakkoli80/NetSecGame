@@ -195,9 +195,9 @@ def plot_fig3_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
         traj = r2b_ent.get(key, {}).get("entropy_trajectory", [])
         if not traj:
             continue
-        steps = [pt["step"] for pt in traj if pt["n"] >= 3]
-        means = [pt["mean_entropy"] for pt in traj if pt["n"] >= 3]
-        cis = [pt["ci95_entropy"] for pt in traj if pt["n"] >= 3]
+        steps = [pt["step"] for pt in traj if pt["n"] >= 3 and pt["step"] <= 60]
+        means = [pt["mean_entropy"] for pt in traj if pt["n"] >= 3 and pt["step"] <= 60]
+        cis = [pt["ci95_entropy"] for pt in traj if pt["n"] >= 3 and pt["step"] <= 60]
         if not steps:
             continue
         ax1.plot(steps, means, label=label, color=color, linestyle=ls, linewidth=1.8)
@@ -208,6 +208,7 @@ def plot_fig3_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
     ax1.set_title("(a) Sliding-Window Action Entropy $H_t$ (Three-Networks, Monitor On)", fontweight="bold")
     ax1.set_xlabel("Episode Step $t$")
     ax1.set_ylabel("Shannon Entropy $H_t$ (bits)")
+    ax1.set_xlim(1, 60)
     ax1.grid(True, linestyle="--", alpha=0.35)
     ax1.legend(loc="best")
 
@@ -224,11 +225,11 @@ def plot_fig3_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
     lat_7b = float(s7b.get("avg_latency_ms_per_step", 0.0))
     win_7b = float(s7b.get("win_rate_percent", 0.0))
 
-    # Published reference point from Rigaki et al. (ESWA 2026) Table 5: Hackphyr-7B FP16 (14 GB VRAM, 42.3% Three-Nets Defender win rate)
+    # Published reference point from Rigaki et al. (ESWA 2026) Table 5: Hackphyr-7B FP16 (14 GB VRAM, 23.3% Three-Nets Defender win rate)
     points = [
         ("Proposed 1.5B-BF16\n(Ours)", vram_15, win_15, f"{lat_15:.0f} ms/step", "#38a169", "o"),
         ("Proposed 7B-NF4\n(Ours)", vram_7b, win_7b, f"{lat_7b:.0f} ms/step", "#2b6cb0", "s"),
-        ("Hackphyr 7B-FP16\n(ESWA 2026 Ref)", 14.0, 42.3, "~14.0 GB FP16", "#c53030", "^"),
+        ("Hackphyr 7B-FP16\n(ESWA 2026 Ref)", 14.0, 23.3, "~14.0 GB FP16", "#c53030", "^"),
     ]
     for lbl, vx, wy, note, col, marker in points:
         ax2.scatter([vx], [wy], s=180, color=col, marker=marker, zorder=5, edgecolors="black", linewidth=0.8)

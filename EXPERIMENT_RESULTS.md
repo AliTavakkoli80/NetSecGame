@@ -102,11 +102,11 @@ Exact two-sided **McNemar's tests** (win rate), **Wilcoxon signed-rank tests**, 
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | Random Baseline (ESWA 2026 / Ours) | CPU | ~4.7% (`4.65%` ours) | ~0.3% (`0.25%` ours) | ~3.3% (`3.30%` ours) | ~0.3% (`0.30%` ours) |
 | Untuned Zephyr-7B-Beta (ESWA 2026 Ref) | ~14 GB FP16 | 23.65% | — | — | — |
-| Fine-Tuned Hackphyr-7B (ESWA 2026 Ref) | ~14 GB FP16 | ~96.0% | ~73.0% | ~87.0% | 42.3% |
+| Fine-Tuned Hackphyr-7B (ESWA 2026 Ref) | ~14 GB FP16 | ~96.0% | ~73.0% | ~87.0% | 23.3% |
 | **Proposed 1.5B-BF16 (Zero-Shot, Ours)** | **3.24 GB** | **98.67%** | **51.33%** | **93.33%** | **44.67%** |
 | **Proposed 7B-NF4 (Zero-Shot, Ours)** | **5.95 GB** | **99.33%** | **71.33%** | **93.33%** | **64.00%** |
 
-Without any task-specific fine-tuning or hardcoded domain knowledge, our zero-shot **7B-NF4 BeliefGraph + Minimax Utility** planner achieves **+21.7 percentage points higher win rate** (`64.00%` vs. `42.3%`) than fine-tuned Hackphyr-7B on the hardest multi-hop `Three-Networks + Monitor On` regime while using **< 43% of the VRAM** (`5.95 GB` vs. `14 GB`).
+Without any task-specific fine-tuning or hardcoded domain knowledge, our zero-shot **7B-NF4 BeliefGraph + Minimax Utility** planner achieves **+40.7 percentage points higher win rate** (`64.00%` vs. `23.3%`) than fine-tuned Hackphyr-7B on the hardest multi-hop `Three-Networks + Monitor On` regime while using **< 43% of the VRAM** (`5.95 GB` vs. `14 GB`).
 
 ---
 
