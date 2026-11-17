@@ -123,7 +123,14 @@ Under an action repetition collapse (e.g., repeatedly issuing \texttt{ScanNetwor
 \section{Proposed Cognitive \& Stealth Architecture}
 \label{sec:architecture}
 
-Our planner architecture (\texttt{ModernSLMAttacker}) decouples exact topological state bookkeeping from semantic contextual reasoning while preserving full SLM autonomy over permissible action selection. Zero environment-specific strings (IPs, CIDR subnets, service banners, or scenario names) appear anywhere in the codebase.
+Our planner architecture (\texttt{ModernSLMAttacker}) decouples exact topological state bookkeeping from semantic contextual reasoning while preserving full SLM autonomy over permissible action selection. As illustrated in Figure~\ref{fig:arch}, the wrapper integrates four zero-hardcoding modules: (A) the Topological Belief Graph $\mathcal{G}_t$, (B) the Multi-Scale Minimax Hazard Utility $U(a)$, (C) the Low-Latency Local SLM Engine, and (D) 1-Step Counterfactual Reflexion with deadlock-safe fallback. Zero environment-specific strings (IPs, CIDR subnets, service banners, or scenario names) appear anywhere in the codebase.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig1_system_architecture.pdf}
+    \caption{End-to-end cognitive and stealth planning pipeline combining the Topological Belief Graph ($\mathcal{G}_t$), Multi-Scale Minimax Utility ($U(a)$), KV-prefix cached local SLM inference with balanced JSON-brace early stopping, and 1-Step Counterfactual Reflexion.}
+    \label{fig:arch}
+\end{figure*}
 
 \subsection{Domain-Agnostic Topological Belief Graph}
 Because NetSecGame randomizes IP addresses, host counts, and goal targets at every episode reset, raw prose observations force small context-window SLMs to repeatedly re-parse unstructured IP lists. Instead, \texttt{SemanticMemoryStore} incrementally maintains a \textbf{Topological Belief Graph} $\mathcal{G}_t = (\mathcal{V}_t, \mathcal{E}_t)$ strictly from observed \texttt{(o\_t, a\_{t-1}, r\_t)} transitions:
@@ -139,7 +146,14 @@ Because NetSecGame randomizes IP addresses, host counts, and goal targets at eve
     \item \textbf{Directed Exhausted Edge Pruning ($\mathcal{E}_t$):} Every executed tuple $(\text{type}(a), \text{canonical}(a.\text{params}))$ is recorded in \texttt{executed\_actions} (normalization strips syntax casing and orders dictionary keys uniformly). All syntactically legal \texttt{(ActionType, Parameters)} tuples permitted by NetSecGame state transition semantics are enumerated and filtered by set difference against \texttt{executed\_actions}, removing exact wasted retries while retaining alternative routes or newly unlocked targets.
 \end{itemize}
 
-Algorithm~\ref{alg:belief_graph} summarizes belief compilation and candidate frontier construction. Importantly, unlike FSM wrappers that select one hardcoded next action, \texttt{get\_valid\_action\_space} exposes the full pruned valid frontier $\mathcal{A}^{\text{valid}}_t$ inside the structured prompt so the SLM chooses freely among valid non-redundant operations.
+Algorithm~\ref{alg:belief_graph} summarizes belief compilation and candidate frontier construction, while Figure~\ref{fig:mechanism}(a) depicts the epistemic host lifecycle transitions across kill-chain actions. Importantly, unlike FSM wrappers that select one hardcoded next action, \texttt{get\_valid\_action\_space} exposes the full pruned valid frontier $\mathcal{A}^{\text{valid}}_t$ inside the structured prompt so the SLM chooses freely among valid non-redundant operations.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig2_belief_and_hazard_mechanism.pdf}
+    \caption{(a) Epistemic host lifecycle state machine inside the Topological Belief Graph $\mathcal{G}_t$, and (b) Multi-Scale Minimax Hazard Utility $U(a)$ decomposition across $w \in \{3, 5, 8\}$ showing burst suppression on \texttt{FindServices}/\texttt{ScanNetwork} versus positive interleaved progression.}
+    \label{fig:mechanism}
+\end{figure*}
 
 \begin{algorithm}[t]
 \caption{Topological Belief Graph Update \& Frontier Enumeration}
@@ -189,7 +203,7 @@ Given recent execution-type history $\mathcal{H}_t$, for each horizon scale $w \
     \end{equation}
     \item \textit{Exfiltration spacing guard:} prior diagnostic traces revealed that clustering two \texttt{ExfiltrateData} attempts inside a monitor window frequently trips strict exfiltration-rate detectors; hence $E_w(a) = 1.0$ if $\mathrm{type}(a) = \mathrm{ExfiltrateData}$ and $\mathrm{count}(\mathrm{ExfiltrateData},\, \mathcal{H}_t[-w:]) \ge 1$, and $0.0$ otherwise.
 \end{enumerate}
-The scale-$w$ hazard is $R_w(a \mid \mathcal{H}_t) = \min\big(1.0,\, \max(\rho_w(a), B_w(a), E_w(a))\big)$, and redundancy adds $+0.35$ bounded to $[0, 1]$. Notice how $U(a)$ resolves both exploration breadth-first traps and exfiltration clustering uniformly: immediately after \texttt{FindServices}, $B_w(\mathrm{FindServices}) \ge 0.55$ drives $U(\mathrm{FindServices}) \le 0.42 - 1.2(0.55) = -0.24$, whereas an unexplored \texttt{ExploitService} yields $U(\mathrm{ExploitService}) = 0.62 - 1.2(0.333) = +0.22$, deterministically interleaving discovery with exploitation.
+The scale-$w$ hazard is $R_w(a \mid \mathcal{H}_t) = \min\big(1.0,\, \max(\rho_w(a), B_w(a), E_w(a))\big)$, and redundancy adds $+0.35$ bounded to $[0, 1]$. As visualized in Figure~\ref{fig:mechanism}(b), $U(a)$ resolves both exploration breadth-first traps and exfiltration clustering uniformly: immediately after \texttt{FindServices}, $B_w(\mathrm{FindServices}) \ge 0.55$ drives $U(\mathrm{FindServices}) \le 0.42 - 1.2(0.55) = -0.24$, whereas an unexplored \texttt{ExploitService} yields $U(\mathrm{ExploitService}) = 0.62 - 1.2(0.20) = +0.38$, deterministically interleaving discovery with exploitation.
 
 When \texttt{enable\_stealth\_pacing=True}, soft masking defers actions violating streak-breaking constraints (if non-reconnaissance depth actions exist after \texttt{FindServices}/\texttt{ScanNetwork}) or exceeding threshold risk whenever at least one lower-hazard candidate exists in $\mathcal{A}^{\text{valid}}_t$ (deadlock-safe bypass if all valid actions carry high hazard), and sorts the prompt's permissible candidate list by descending $U(a)$.
 
@@ -372,12 +386,12 @@ Regime & Comparator & McNemar $p$ (Win) & Discordant $(b,c)$ & Wilcoxon $p$ (Ret
 }
 \end{table*}
 
-In both defended regimes, win-rate superiority over \texttt{BeliefGraph\_\allowbreak{}NoStealth} is highly significant ($p < 10^{-6}$; discordant wins $(67,4)$ in \texttt{Full} and $(68,6)$ in \texttt{Three-Networks}), accompanied by large Cliff's $\delta$ return improvements ($\delta = +0.5104$ and $+0.3818$). Against non-stealth \texttt{Baseline\_PureHeuristic}, win-rate gains are similarly decisive ($p < 10^{-6}$ in \texttt{Full}; $p = 2\times 10^{-6}$ in \texttt{Three-Networks}). Critically, when comparing against the deterministic stealth control \texttt{Ablation\_\allowbreak{}PureHeuristic\_\allowbreak{}WithStealth} ($\arg\max_a U(a)$ with zero LLM calls), \texttt{Proposed\_\allowbreak{}SLM\_\allowbreak{}7B\_\allowbreak{}NF4} achieves statistically indistinguishable win rates across all four regimes (McNemar $p = 1.000$ in 1A and 1B, $p = 0.503$ in 2A, $p = 0.856$ in 2B), while taking slightly longer exploratory trajectories (\texttt{4.6}--\texttt{9.4} more steps; Wilcoxon $p \le 0.011$). Figure~\ref{fig:ablation} visualizes the Win Rate and Monitor Alert Rate shifts across the core six baselines and ablations with 95\% confidence bars.
+In both defended regimes, win-rate superiority over \texttt{BeliefGraph\_\allowbreak{}NoStealth} is highly significant ($p < 10^{-6}$; discordant wins $(67,4)$ in \texttt{Full} and $(68,6)$ in \texttt{Three-Networks}), accompanied by large Cliff's $\delta$ return improvements ($\delta = +0.5104$ and $+0.3818$). Against non-stealth \texttt{Baseline\_PureHeuristic}, win-rate gains are similarly decisive ($p < 10^{-6}$ in \texttt{Full}; $p = 2\times 10^{-6}$ in \texttt{Three-Networks}). Critically, when comparing against the deterministic stealth control \texttt{Ablation\_\allowbreak{}PureHeuristic\_\allowbreak{}WithStealth} ($\arg\max_a U(a)$ with zero LLM calls), \texttt{Proposed\_\allowbreak{}SLM\_\allowbreak{}7B\_\allowbreak{}NF4} achieves statistically indistinguishable win rates across all four regimes (McNemar $p = 1.000$ in 1A and 1B, $p = 0.503$ in 2A, $p = 0.856$ in 2B), while taking slightly longer exploratory trajectories (\texttt{4.6}--\texttt{9.4} more steps; Wilcoxon $p \le 0.011$). Figure~\ref{fig:ablation}(a)--(b) visualizes the Win Rate and Monitor Alert Rate shifts across all seven evaluated configurations with 95\% confidence bars, while Figure~\ref{fig:ablation}(c) breaks down SLM decision autonomy into first-pass validity, 1-step reflexion recovery, and residual minimax overrides.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig2_ablation_win_detect_bars.pdf}
-    \caption{Ablation of Win Rate (\%) and Monitor Alert Rate (\%) with 95\% confidence intervals ($n=150$ per SLM/heuristic agent; $n=2{,}000$ for Random baseline) in \texttt{Full + Monitor On} (left) and \texttt{Three-Networks + Monitor On} (right).}
+    \includegraphics[width=\textwidth]{figures/fig3_ablation_and_autonomy.pdf}
+    \caption{(a)--(b) Ablation of Win Rate (\%) and Monitor Alert Rate (\%) with 95\% confidence intervals across all 7 configurations ($n=150$ per agent; $n=2{,}000$ for Random baseline) in \texttt{Full + Monitor On} and \texttt{Three-Networks + Monitor On}; (c) stacked SLM Decision Autonomy Breakdown (\texttt{FirstPassValid \%}, \texttt{+1-Step Reflexion Gain \%}, and \texttt{Minimax Override \%}).}
     \label{fig:ablation}
 \end{figure*}
 
@@ -416,7 +430,7 @@ To inspect \textit{how} our planner avoids detection mechanically, Figure~\ref{f
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig1_markov_transitions_comparison.pdf}
+    \includegraphics[width=\textwidth]{figures/fig4_markov_transitions_comparison.pdf}
     \caption{Empirical 7$\times$7 Markov action-transition probability heatmaps in \texttt{Three-Networks + Monitor On} ($n=150$): \texttt{RawReAct} (left), \texttt{BeliefGraph\_\allowbreak{}NoStealth} (center), and \texttt{Proposed BeliefGraph + Minimax Utility} (right).}
     \label{fig:markov}
 \end{figure*}
@@ -424,8 +438,8 @@ To inspect \textit{how} our planner avoids detection mechanically, Figure~\ref{f
 Three structural regimes emerge clearly in Figure~\ref{fig:markov}:
 \begin{enumerate}
     \item \textbf{Entropy Collapse (\texttt{RawReAct}, left):} \texttt{Start} transitions deterministically (\texttt{1.00}) to \texttt{ScanNetwork}, which then exhibits a \texttt{1.00} self-loop (\texttt{ScanNetwork} $\rightarrow$ \texttt{ScanNetwork}), never transitioning to downstream exploitation ($H_t = 0.000$ bits).
-    \item \textbf{Breadth-First Bursting (\texttt{BeliefGraph\_\allowbreak{}NoStealth}, center):} \texttt{FindServices} exhibits an elevated \texttt{0.56} self-loop alongside a \texttt{0.40} \texttt{ScanNetwork} self-loop and high transition back into \texttt{FindServices} (\texttt{0.54} from \texttt{FindData}, \texttt{0.38} from \texttt{ExfiltrateData}). Concentrating consecutive service probes trips \texttt{GlobalDefender} before remote lateral pivoting matures.
-    \item \textbf{Interleaved Depth-First Progression (\texttt{BeliefGraph + Minimax Utility}, right):} \texttt{ScanNetwork} (\texttt{0.00} self-loop) and \texttt{ExploitService} (\texttt{0.00} self-loop) eliminate intra-phase bursts entirely, while \texttt{FindServices} self-loops drop from \texttt{0.56} to \texttt{0.26} as the planner transitions cleanly from \texttt{FindServices} $\rightarrow$ \texttt{ExploitService} (\texttt{0.56}) and from \texttt{ExploitService} $\rightarrow$ \texttt{FindData} (\texttt{0.61}) / \texttt{ScanNetwork} (\texttt{0.22}).
+    \item \textbf{Breadth-First Bursting (\texttt{BeliefGraph\_\allowbreak{}NoStealth}, center):} \texttt{FindServices} exhibits a \texttt{0.22} self-loop alongside a \texttt{0.68} \texttt{ScanNetwork} $\rightarrow$ \texttt{FindServices} burst and high transitions back into \texttt{FindServices} (\texttt{0.54} from \texttt{FindData}, \texttt{0.56} from \texttt{ExfiltrateData}). Concentrating consecutive service probes trips \texttt{GlobalDefender} before remote lateral pivoting matures.
+    \item \textbf{Interleaved Depth-First Progression (\texttt{BeliefGraph + Minimax Utility}, right):} \texttt{ExploitService} (\texttt{0.00} self-loop) eliminates intra-phase exploitation bursts entirely, \texttt{ScanNetwork} self-loops remain minimal (\texttt{0.06}), and \texttt{FindServices} self-loops drop from \texttt{0.22} to \texttt{0.08} as the planner transitions decisively from \texttt{FindServices} $\rightarrow$ \texttt{ExploitService} (\texttt{0.43}) and from \texttt{ExploitService} $\rightarrow$ \texttt{FindData} (\texttt{0.93}).
 \end{enumerate}
 
 MITRE ATT\&CK phase-arrival timestamps from \texttt{statistical\_\allowbreak{}analysis\_\allowbreak{}report.\allowbreak{}json} corroborate this behavioral shift. In \texttt{Regime 2B} (\texttt{Three-Networks} + Monitor On), because NetSecGame initializes the attacker on a client foothold where local data resides, \texttt{FindData} occurs at median step \texttt{1.0} (\texttt{IQR = 0.0}) across all Belief Graph agents; however, reaching remote \texttt{Exploit\-Service} (the pivotal bottleneck required to penetrate server subnets A and B) improves markedly under \texttt{WithStealth}: \texttt{119/150} episodes reach \texttt{Exploit\-Service} at median step \textbf{\texttt{8.0}} (\texttt{IQR = 2.0}, mean \texttt{10.08}), compared to only \texttt{102/150} episodes reaching it at median step \texttt{11.0} (\texttt{IQR = 5.0}, mean \texttt{11.70}) for \texttt{BeliefGraph\_\allowbreak{}NoStealth} (and \texttt{0/150} for \texttt{RawReAct}). Similar gains hold in \texttt{Regime 1B} (\texttt{122/150} at median step \texttt{8.0}, \texttt{IQR = 2.0}, vs. \texttt{102/150} at median step \texttt{12.0}, \texttt{IQR = 4.0}).
@@ -434,7 +448,7 @@ Figure~\ref{fig:pareto}(a) plots the step-wise Shannon Action Entropy $H_t$ ($w=
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig3_entropy_and_pareto.pdf}
+    \includegraphics[width=\textwidth]{figures/fig5_entropy_and_pareto.pdf}
     \caption{(a) Sliding-window Shannon action entropy $H_t$ ($w=5$, capped at $t \le 60$ with 95\% CI shading) on \texttt{Three-Networks + Monitor On}, and (b) Hardware-Aware Pareto Frontier comparing peak GPU VRAM (GB), per-step latency, and Win Rate (\%) against the published ESWA 2026 \texttt{Hackphyr 7B-FP16} reference ($23.3\%$, $\approx 14~\text{GB}$).}
     \label{fig:pareto}
 \end{figure*}
