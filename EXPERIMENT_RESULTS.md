@@ -98,15 +98,21 @@ Exact two-sided **McNemar's tests** (win rate), **Wilcoxon signed-rank tests**, 
 
 ## 4. Comparison with Rigaki et al. (ESWA 2026, Tables 4 & 5)
 
-| Agent / Method | Hardware / VRAM | Full (NoDef) Win % | Full (Monitor On) Win % | Three-Nets (NoDef) Win % | Three-Nets (Monitor On) Win % |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| Random Baseline (ESWA 2026 / Ours) | CPU | ~4.7% (`4.65%` ours) | ~0.3% (`0.25%` ours) | ~3.3% (`3.30%` ours) | ~0.3% (`0.30%` ours) |
-| Untuned Zephyr-7B-Beta (ESWA 2026 Ref) | ~14 GB FP16 | 23.65% | — | — | — |
-| Fine-Tuned Hackphyr-7B (ESWA 2026 Ref) | ~14 GB FP16 | ~96.0% | ~73.0% | ~87.0% | 23.3% |
-| **Proposed 1.5B-BF16 (Zero-Shot, Ours)** | **3.24 GB** | **98.67%** | **51.33%** | **93.33%** | **44.67%** |
-| **Proposed 7B-NF4 (Zero-Shot, Ours)** | **5.95 GB** | **99.33%** | **71.33%** | **93.33%** | **64.00%** |
+Exact published baselines and 95% confidence intervals extracted directly from Tables 4 & 5 of Rigaki, Catania, & García (*Expert Systems With Applications*, Vol. 299, 2026, Article `129987`, `DOI: 10.1016/j.eswa.2025.129987`) compared against our 150-episode / 2,000-episode randomized evaluations (`max_steps = 100`):
 
-Without any task-specific fine-tuning or hardcoded domain knowledge, our zero-shot **7B-NF4 BeliefGraph + Minimax Utility** planner achieves **+40.7 percentage points higher win rate** (`64.00%` vs. `23.3%`) than fine-tuned Hackphyr-7B on the hardest multi-hop `Three-Networks + Monitor On` regime while using **< 43% of the VRAM** (`5.95 GB` vs. `14 GB`).
+| Agent / Method | Hardware / VRAM | Full (NoDef) Win % (Return) | Full (Monitor On) Win % (Return) | Three-Nets (NoDef) Win % (Return) | Three-Nets (Monitor On) Win % (Return) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Random Baseline (ESWA 2026 Ref) | CPU | 31.16 ± 2.03 (-57.49) | 2.72 ± 0.71 (-66.56) | 4.86 ± 0.94 (-93.28) | 0.13 ± 0.16 (-70.73) |
+| Random Baseline (Ours, 2,000 eps) | CPU | 4.65 ± 0.92 (-103.55) | 0.25 ± 0.22 (-32.24) | 3.30 ± 0.78 (-105.50) | 0.30 ± 0.24 (-32.29) |
+| Q-Learning (ESWA 2026 Ref, fixed IPs) | CPU | 67.71 ± 4.09 (25.49) | 71.57 ± 3.95 (42.94) | 0.00 ± 0.00 (-100.00) | 0.00 ± 0.00 (-70.45) |
+| GPT-3.5-turbo (ESWA 2026 Ref) | Cloud API | 30.00 ± 16.40 (-51.67) | 16.67 ± 13.33 (-58.00) | 10.00 ± 10.73 (-87.50) | 6.67 ± 8.93 (-63.63) |
+| Untuned Zephyr-7B-$\beta$ (ESWA 2026 Ref) | ~14 GB FP16 | 23.65 ± 4.80 (-51.77) | 3.33 ± 2.03 (-66.68) | 1.75 ± 1.97 (-98.80) | 0.62 ± 1.21 (-70.42) |
+| Fine-Tuned Hackphyr-7B (ESWA 2026 Ref) | ~14 GB FP16 | 89.10 ± 4.74 (61.03) | 44.00 ± 6.88 (3.56) | 50.34 ± 8.00 (-14.26) | 23.33 ± 6.77 (-37.67) |
+| GPT-4 (ESWA 2026 Ref) | Cloud API | 100.00 ± 0.00 (77.13) | 53.33 ± 17.85 (8.80) | 82.35 ± 13.64 (18.78) | 36.36 ± 17.21 (-21.69) |
+| **Proposed 1.5B-BF16 (Zero-Shot, Ours)** | **3.24 GB** | **98.67 ± 1.84 (+58.70)** | **51.33 ± 8.03 (+20.74)** | **93.33 ± 4.01 (+43.33)** | **44.67 ± 7.98 (+11.65)** |
+| **Proposed 7B-NF4 (Zero-Shot, Ours)** | **5.95 GB** | **99.33 ± 1.31 (+69.49)** | **71.33 ± 7.26 (+46.55)** | **93.33 ± 4.01 (+53.15)** | **64.00 ± 7.71 (+32.77)** |
+
+Without any task-specific fine-tuning or hardcoded domain knowledge, our zero-shot **7B-NF4 BeliefGraph + Minimax Utility** planner outperforms both fine-tuned **Hackphyr-7B** (`+27.33 pp` in `Full + Monitor On` [`71.33%` vs. `44.00%`]; `+40.67 pp` in `Three-Networks + Monitor On` [`64.00%` vs. `23.33%`]) and cloud **GPT-4** (`71.33%` vs. `53.33%` in `Full + Monitor On`; `93.33%` vs. `82.35%` in `Three-Networks NoDef`; `64.00%` vs. `36.36%` in `Three-Networks + Monitor On`), while using **< 43% of Hackphyr's VRAM** (`5.95 GB` vs. `14 GB`). Even our lightweight **1.5B-BF16** (`3.24 GB` VRAM) exceeds fine-tuned Hackphyr-7B across every regime.
 
 ---
 
