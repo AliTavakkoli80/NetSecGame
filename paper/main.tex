@@ -30,7 +30,7 @@
             country={Iran}}
 
 \begin{abstract}
-Autonomous sequential decision agents deployed inside enterprise security testbeds face a fundamental tension between reasoning generality, operational stealth, and local compute constraints. Prior studies showed that untuned 7-billion-parameter Small Language Models (SLMs) collapse into repetitive, detectable action loops under partial observability, necessitating parameter-efficient supervised fine-tuning (SFT) such as Hackphyr. However, fine-tuned weights remain brittle when confronted with dynamic topology randomization, unseen multi-subnet pivoting, or active sliding-window security monitors, and typically demand $\approx 14~\text{GB}$ of half-precision GPU memory. We present a strictly domain-agnostic, training-free sequential planning architecture that unlocks zero-shot cyber planning in off-the-shelf local SLMs (\texttt{Qwen2.5-Coder-7B-NF4} and \texttt{1.5B-BF16}). Our framework formulates monitored network traversal as a Constrained Partially Observable Markov Decision Process (C-POMDP) and integrates three synergistic mechanisms: (i) a Topological Belief Graph $\mathcal{G}_t$ that compiles raw discrete observations into epistemic node states (\texttt{UNEXPLORED}, \texttt{MAPPED}, \texttt{COMPROMISED}, \texttt{EXHAUSTED}) to prune redundant transitions without hardcoded domain heuristics; (ii) a Multi-Scale Minimax Hazard Utility function $U(a) = \alpha \cdot \mathrm{ProgressGain}(a \mid \mathcal{G}_t) - \beta \cdot \max_{w \in \{3,5,8\}} R_w(a \mid \mathcal{H}_t)$ that suppresses bursty detection signatures across multiple temporal horizons without assuming knowledge of the monitor's exact window size $W$; and (iii) a 1-Step Counterfactual Reflexion loop coupled with balanced JSON-brace early stopping and static prefix KV-caching for low-latency execution. Across 11,600 randomized evaluation episodes spanning four NetSecGame regimes matched to the Rigaki et al. (ESWA 2026) protocol ($n=150$ paired episodes per agent configuration; $n=2{,}000$ for the uniform random baseline), our zero-shot \texttt{7B-NF4} planner achieves a \texttt{71.33\% $\pm$ 7.26\%} win rate in the Full-Topology Monitor-On regime (outperforming fine-tuned \texttt{Hackphyr-7B} at \texttt{44.00\%} and \texttt{GPT-4} at \texttt{53.33\%}) and \texttt{64.00\% $\pm$ 7.71\%} on the unseen Three-Networks Monitor-On topology (versus \texttt{23.33\%} for \texttt{Hackphyr} and \texttt{36.36\%} for \texttt{GPT-4}, McNemar $p < 10^{-6}$), while requiring only \texttt{5.95 GB} peak VRAM. A deterministic non-LLM control (\texttt{Ablation\_PureHeuristic\_WithStealth}) confirms that the Minimax Utility scaffold drives stealth evasion (\texttt{70.67\%} and \texttt{65.33\%}), while the \texttt{7B-NF4} SLM matches this win envelope statistically (McNemar $p \ge 0.503$) with higher trajectory diversity ($1.748$--$1.798$ bits) and \texttt{71.2\%--75.9\%} genuine post-reflexion autonomy.
+Autonomous sequential decision agents deployed inside enterprise security testbeds face a fundamental tension between reasoning generality, operational stealth, and local compute constraints. Prior studies showed that untuned 7-billion-parameter Small Language Models (SLMs) collapse into repetitive, detectable action loops under partial observability, necessitating parameter-efficient supervised fine-tuning (SFT) such as Hackphyr. However, fine-tuned weights remain brittle when confronted with dynamic topology randomization, unseen multi-subnet pivoting, or active sliding-window security monitors, and typically demand $\approx 14~\text{GB}$ of half-precision GPU memory. We present a strictly domain-agnostic, training-free sequential planning architecture that unlocks zero-shot cyber planning in off-the-shelf local SLMs (\texttt{Qwen2.5-Coder-7B-NF4} and \texttt{1.5B-BF16}). Our framework formulates monitored network traversal as a Constrained Partially Observable Markov Decision Process (C-POMDP) and integrates three synergistic mechanisms: (i) a Topological Belief Graph $\mathcal{G}_t$ that compiles raw discrete observations into epistemic node states (\texttt{UNEXPLORED}, \texttt{MAPPED}, \texttt{COMPROMISED}, \texttt{EXHAUSTED}) to prune redundant transitions without hardcoded domain heuristics; (ii) a Multi-Scale Minimax Hazard Utility function $U(a) = \alpha \cdot \mathrm{ProgressGain}(a \mid \mathcal{G}_t) - \beta \cdot \max_{w \in \{3,5,8\}} R_w(a \mid \mathcal{H}_t)$ that suppresses bursty detection signatures across multiple temporal horizons without assuming knowledge of the monitor's exact window size $W$; and (iii) a 1-Step Counterfactual Reflexion loop coupled with balanced JSON-brace early stopping and static prefix KV-caching for low-latency execution. Across 11,600 randomized evaluation episodes spanning four NetSecGame regimes matched to the Rigaki et al. (ESWA 2026) protocol ($n=150$ paired episodes per agent configuration; $n=2{,}000$ for the uniform random baseline), our zero-shot \texttt{7B-NF4} planner achieves a $71.33\% \pm 7.26\%$ win rate in the Full-Topology Monitor-On regime (outperforming fine-tuned \texttt{Hackphyr-7B} at \texttt{44.00\%} and \texttt{GPT-4} at \texttt{53.33\%}) and $64.00\% \pm 7.71\%$ on the unseen Three-Networks Monitor-On topology (versus \texttt{23.33\%} for \texttt{Hackphyr} and \texttt{36.36\%} for \texttt{GPT-4}, McNemar $p < 10^{-6}$), while requiring only \texttt{5.95 GB} peak VRAM. A deterministic non-LLM control (\texttt{Ablation\_PureHeuristic\_WithStealth}) confirms that the Minimax Utility scaffold drives stealth evasion (\texttt{70.67\%} and \texttt{65.33\%}), while the \texttt{7B-NF4} SLM matches this win envelope statistically (McNemar $p \ge 0.503$) with higher trajectory diversity ($1.748$--$1.798$ bits) and \texttt{71.2\%--75.9\%} genuine post-reflexion autonomy.
 \end{abstract}
 
 \begin{highlights}
@@ -208,20 +208,20 @@ To minimize fallback reliance on Python overrides while preventing wasted invali
 \Require Observation $o_t$, system prompt $P_{\mathrm{sys}}$, belief store $\mathcal{G}_t$, masking flag $\mathrm{mask}$
 \Ensure Executed \texttt{NetSecGame} action $a_t$, autonomy telemetry flags
 \State Build structured user prompt $P_{\mathrm{usr}}$ (from $\mathcal{G}_t$ ranked by $U(a)$, or raw text in \texttt{RawReAct})
-\State $r_1 \gets \mathrm{SLM.Generate}([P_{\mathrm{sys}}, P_{\mathrm{usr}}])$ \Comment{Prefix KV-cached + Brace Stopping}
-\State $(\mathrm{valid}_1, \mathrm{red}_1, a_1) \gets \mathrm{Validate}(r_1, o_t, \mathcal{G}_t)$
-\State $\mathrm{first\_pass\_valid} \gets \mathrm{valid}_1 \land \neg(\mathrm{use\_memory} \land \mathrm{red}_1)$
+\State $r_1 \leftarrow \mathrm{SLM.Generate}([P_{\mathrm{sys}}, P_{\mathrm{usr}}])$ \Comment{Prefix KV-cached + Brace Stopping}
+\State $(\mathrm{valid}_1, \mathrm{red}_1, a_1) \leftarrow \mathrm{Validate}(r_1, o_t, \mathcal{G}_t)$
+\State $\mathrm{first\_pass\_valid} \leftarrow \mathrm{valid}_1 \land \neg(\mathrm{use\_memory} \land \mathrm{red}_1)$
 \If{$\mathrm{first\_pass\_valid}$}
     \State \Return $a_1$, (\texttt{first\_pass=True}, \texttt{post\_ref=True}, \texttt{overridden=False})
 \ElsIf{$\neg \mathrm{mask}$}
     \State \Return $\mathrm{None}$ \Comment{Strict unmasked penalty, zero override}
 \EndIf
-\State $r_2 \gets \mathrm{SLM.Generate}([P_{\mathrm{sys}}, P_{\mathrm{usr}}, r_1, \mathrm{``Action~rejected...''}])$ \Comment{1-Step Reflexion}
-\State $(\mathrm{valid}_2, \mathrm{red}_2, a_2) \gets \mathrm{Validate}(r_2, o_t, \mathcal{G}_t)$
+\State $r_2 \leftarrow \mathrm{SLM.Generate}([P_{\mathrm{sys}}, P_{\mathrm{usr}}, r_1, \mathrm{``Action~rejected...''}])$ \Comment{1-Step Reflexion}
+\State $(\mathrm{valid}_2, \mathrm{red}_2, a_2) \leftarrow \mathrm{Validate}(r_2, o_t, \mathcal{G}_t)$
 \If{$\mathrm{valid}_2 \land \neg(\mathrm{use\_memory} \land \mathrm{red}_2)$}
     \State \Return $a_2$, (\texttt{first\_pass=False}, \texttt{post\_ref=True}, \texttt{overridden=False})
 \Else
-    \State $a_{\mathrm{fb}} \gets \arg\max_{a \in \mathcal{A}^{\mathrm{valid}}_t} U(a)$
+    \State $a_{\mathrm{fb}} \leftarrow \arg\max_{a \in \mathcal{A}^{\mathrm{valid}}_t} U(a)$
     \State \Return $a_{\mathrm{fb}}$, (\texttt{first\_pass=False}, \texttt{post\_ref=False}, \texttt{overridden=True})
 \EndIf
 \end{algorithmic}
@@ -266,6 +266,7 @@ Table~\ref{tab:regime_nodef} summarizes empirical outcomes across the baseline \
 \centering
 \caption{Evaluation in No-Defender regimes (\texttt{max\_steps = 100}; $n=150$ paired episodes on seeds \texttt{42..191}, except Random $n=2{,}000$). Mean $\pm$ 95\% CI.}
 \label{tab:regime_nodef}
+\setlength{\tabcolsep}{4.5pt}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llcccccccc}
 \toprule
@@ -302,6 +303,7 @@ When \texttt{GlobalDefender} is activated (\texttt{Regime 1B} and \texttt{Regime
 \centering
 \caption{Evaluation in Monitor-On regimes (\texttt{max\_steps = 100}; $n=150$ paired episodes on seeds \texttt{42..191}, except Random $n=2{,}000$). Mean $\pm$ 95\% CI.}
 \label{tab:regime_def}
+\setlength{\tabcolsep}{4.5pt}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llcccccccc}
 \toprule
@@ -338,6 +340,7 @@ Table~\ref{tab:stats_tests} reports exact paired non-parametric hypothesis tests
 \centering
 \caption{Paired statistical tests ($n = 150$, seeds \texttt{42..191}): exact two-sided McNemar $p$-value with discordant pairs $(b,c)$, paired Wilcoxon signed-rank $p$-value, and Cliff's $\delta$ effect size for \texttt{Proposed\_SLM\_7B\_NF4\_BeliefGraph\_WithStealth} versus baselines and the deterministic stealth control.}
 \label{tab:stats_tests}
+\setlength{\tabcolsep}{4.5pt}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llcccccc}
 \toprule
@@ -385,6 +388,7 @@ Table~\ref{tab:eswa_comparison} aligns our empirical benchmarks directly against
 \centering
 \caption{Direct comparison against exact published baselines from Rigaki et al.~\cite{rigaki2026building} (Tables~4 and~5, \texttt{max\_steps = 100}). Note that \texttt{Q-learning} required fixed episode IP layouts, whereas all LLM/SLM evaluations use randomized dynamic addressing.}
 \label{tab:eswa_comparison}
+\setlength{\tabcolsep}{4.5pt}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llcccc}
 \toprule
