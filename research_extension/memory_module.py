@@ -15,6 +15,7 @@ Provides:
 from __future__ import annotations
 
 import ipaddress
+import json
 import re
 from collections import deque
 from dataclasses import dataclass, field
@@ -318,32 +319,17 @@ class EpisodicMemoryBuffer:
 
 class SemanticMemoryStore:
     """
-    Observation-driven Topological Belief Graph & Temporal Stealth Pacing engine.
+    Observation-driven Topological Belief Graph & Multi-Scale Minimax Stealth Engine.
 
     Maintains canonicalized entity beliefs across an episode without any
-    scenario-, IP-, service-, or data-specific hardcoding.
+    scenario-, IP-, service-, data-, or defender-window-specific hardcoding.
     """
 
-    # Generic structural thresholds matching sliding-window SIEM sensitivity profiles.
-    STEALTH_DENSITY_ALERT = 0.40  # >= 2 actions of the same type in W=5
-    CONSECUTIVE_STREAK_ALERT = 2  # >= 2 back-to-back actions of the same type
-
-    # Sliding-window SIEM trigger boundaries (calibrated to GlobalDefender W=5).
-    SIEM_RATIO_THRESHOLDS: Dict[str, float] = {
-        "ScanNetwork": 0.25,
-        "FindServices": 0.30,
-        "ExploitService": 0.25,
-        "FindData": 0.50,
-        "ExfiltrateData": 0.25,
-    }
-    SIEM_CONSECUTIVE_THRESHOLDS: Dict[str, int] = {
-        "ScanNetwork": 2,
-        "FindServices": 3,
-        "ExfiltrateData": 2,
-    }
+    HIGH_HAZARD_THRESHOLD = 0.40
 
     def __init__(self, stealth_window: int = 5, enable_stealth_pacing: bool = True) -> None:
         self.stealth_window = max(1, int(stealth_window))
+        self.hazard_windows: Tuple[int, ...] = self.HAZARD_SCALES
         self.enable_stealth_pacing = bool(enable_stealth_pacing)
         self.reset_episode()
 
@@ -553,7 +539,7 @@ class SemanticMemoryStore:
         history = self._sync_history(episodic_memory)
         max_hazard = 0.0
 
-        for w in self.HAZARD_SCALES:
+        for w in self.hazard_windows:
             next_window = (history[-(w - 1) :] if w > 1 else []) + [canon]
             density_w = next_window.count(canon) / float(w)
 
@@ -588,7 +574,7 @@ class SemanticMemoryStore:
         parameters: Optional[Dict[str, Any]] = None,
         episodic_memory: Optional[EpisodicMemoryBuffer] = None,
         alpha: float = 1.0,
-        beta: float = 1.2,
+        beta: Optional[float] = None,
     ) -> Tuple[float, float, float]:
         """
         Evaluate U(a) = alpha * ProgressGain(a | G_t) - beta * max_{w in {3,5,8}} R_w(a | H_t).
@@ -609,7 +595,8 @@ class SemanticMemoryStore:
         max_hazard = self.compute_multiscale_hazard(
             canon, parameters=parameters, episodic_memory=episodic_memory
         )
-        utility = round(alpha * gain - beta * max_hazard, 4)
+        effective_beta = (1.2 if self.enable_stealth_pacing else 0.0) if beta is None else beta
+        utility = round(alpha * gain - effective_beta * max_hazard, 4)
         return utility, round(gain, 4), max_hazard
 
     def score_action_stealth_risk(
@@ -635,33 +622,31 @@ class SemanticMemoryStore:
         episodic_memory: Optional[EpisodicMemoryBuffer] = None,
     ) -> bool:
         """
-        Return True if executing `action_type` next would breach the W=5 sliding-window
-        SIEM density or consecutive-streak threshold (matching GlobalDefender).
+        Return True if executing `action_type` next triggers elevated window-agnostic
+        multi-scale minimax hazard max_{w in (3,5,8)} R_w(a | H_t) >= 0.40 (exceeding
+        the fresh-action baseline 1/3), a consecutive burst streak >= 2 on burst-sensitive
+        actions, or exact action redundancy. Preserves zero knowledge of defender window W*.
         """
         canon = canonicalize_action_type(action_type)
-        history = self._sync_history(episodic_memory)
-        w = self.stealth_window
-        next_window = (history[-(w - 1) :] if w > 1 else []) + [canon]
-
-        projected_density = next_window.count(canon) / float(w)
-        ratio_thresh = self.SIEM_RATIO_THRESHOLDS.get(canon, 1.0)
-        if projected_density >= ratio_thresh:
-            return True
-
-        # Frequency spacing for ExfiltrateData: avoid clustering >= 2 within last W steps
-        if canon == "ExfiltrateData" and history[-w:].count("ExfiltrateData") >= 1:
-            return True
-
-        consec_thresh = self.SIEM_CONSECUTIVE_THRESHOLDS.get(canon)
-        if consec_thresh is not None:
-            max_consec = max(
-                (sum(1 for _ in grp) for act, grp in groupby(next_window) if act == canon),
-                default=0,
-            )
-            if max_consec >= consec_thresh:
-                return True
-
         if parameters is not None and self.is_action_redundant(canon, parameters):
+            return True
+
+        max_hazard = self.compute_multiscale_hazard(
+            canon,
+            parameters=parameters,
+            episodic_memory=episodic_memory,
+        )
+        if max_hazard >= self.HIGH_HAZARD_THRESHOLD:
+            return True
+
+        history = self._sync_history(episodic_memory)
+        streak = 1
+        for act in reversed(history):
+            if act == canon:
+                streak += 1
+            else:
+                break
+        if streak >= 2 and canon in ("ScanNetwork", "FindData", "ExfiltrateData"):
             return True
 
         return False
@@ -701,7 +686,7 @@ class SemanticMemoryStore:
             )
             cand_with_risk = {**cand, "stealth_risk": score}
             scored_candidates.append((score, cand_with_risk))
-            if score >= 0.45:
+            if score >= self.HIGH_HAZARD_THRESHOLD:
                 elevated_types.add(act_type)
             else:
                 low_risk_types.add(act_type)
@@ -1167,35 +1152,37 @@ class SemanticMemoryStore:
                 lines.append(f"Observed Firewall Blocks: {'; '.join(blk_parts)}")
 
         # 3. Temporal Stealth Advisory
-        lines.append("\n=== TEMPORAL STEALTH ADVISORY (SLIDING WINDOW W=5) ===")
-        lines.append(
-            f"SIEM Pressure: {advisory['window_status']} | "
-            f"Recent Window: {advisory['recent_window'] or ['<empty>']}"
-        )
-        if advisory["density_by_type"]:
-            dens_str = ", ".join(
-                f"{k}: d={advisory['density_by_type'][k]:.2f}, streak={advisory['streak_by_type'][k]}"
-                for k in sorted(advisory["density_by_type"].keys())
-            )
-            lines.append(f"Window Metrics: {dens_str}")
-        if advisory["elevated_risk_types"]:
+        if self.enable_stealth_pacing:
+            scales_str = ",".join(str(w) for w in self.hazard_windows)
+            lines.append(f"\n=== TEMPORAL STEALTH ADVISORY (MULTI-SCALE W={{{scales_str}}}) ===")
             lines.append(
-                f"High-Detection-Risk Action Types (burst/density alert): {advisory['elevated_risk_types']}."
+                f"SIEM Pressure: {advisory['window_status']} | "
+                f"Recent Window: {advisory['recent_window'] or ['<empty>']}"
             )
-        if advisory["low_risk_types"]:
+            if advisory["density_by_type"]:
+                dens_str = ", ".join(
+                    f"{k}: d={advisory['density_by_type'][k]:.2f}, streak={advisory['streak_by_type'][k]}"
+                    for k in sorted(advisory["density_by_type"].keys())
+                )
+                lines.append(f"Window Metrics: {dens_str}")
+            if advisory["elevated_risk_types"]:
+                lines.append(
+                    f"High-Detection-Risk Action Types (burst/density alert): {advisory['elevated_risk_types']}."
+                )
+            if advisory["low_risk_types"]:
+                lines.append(
+                    f"Low-Footprint Diversified Options Available: {advisory['low_risk_types']}."
+                )
+            if deferred_count > 0:
+                lines.append(
+                    f"Active Stealth Pacing: {deferred_count} high-risk action(s) exceeding multi-scale "
+                    f"minimax hazard ({self.HIGH_HAZARD_THRESHOLD:.2f}) have been temporarily deferred to preserve stealth."
+                )
             lines.append(
-                f"Low-Footprint Diversified Options Available: {advisory['low_risk_types']}."
+                "Tradeoff Guidance: Prefer depth-first, alternating action types — exploit mapped services "
+                "and collect data on discovered/compromised targets before scanning additional hosts or "
+                "subnets — to evade SIEM burst detection."
             )
-        if deferred_count > 0:
-            lines.append(
-                f"Active Stealth Pacing: {deferred_count} high-risk action(s) exceeding W={self.stealth_window} "
-                "SIEM thresholds have been temporarily deferred to preserve stealth."
-            )
-        lines.append(
-            "Tradeoff Guidance: Prefer depth-first, alternating action types — exploit mapped services "
-            "and collect data on discovered/compromised targets before scanning additional hosts or "
-            "subnets — to evade SIEM burst detection."
-        )
 
         # 4. Permissible Unexplored Actions (Stealth-Scheduled when pacing is active)
         section_header = (
@@ -1206,9 +1193,14 @@ class SemanticMemoryStore:
         lines.append(f"\n{section_header}")
         if display_actions:
             for idx, act in enumerate(display_actions, start=1):
+                params_json = json.dumps(act["parameters"], separators=(",", ":"))
+                risk_suffix = (
+                    f" | stealth_risk={act.get('stealth_risk', 0.0):.2f}"
+                    if self.enable_stealth_pacing
+                    else ""
+                )
                 lines.append(
-                    f"  {idx}. action={act['action']} | parameters={act['parameters']} "
-                    f"| stealth_risk={act.get('stealth_risk', 0.0):.2f}"
+                    f"  {idx}. action={act['action']} | parameters={params_json}{risk_suffix}"
                 )
             omitted = len(advisory["scored_candidates"]) - len(display_actions)
             if omitted > 0:
@@ -1233,7 +1225,7 @@ class SemanticMemoryStore:
 
         lines.append(
             "\nSelect ONE entry from the permissible actions list above (do not repeat actions from "
-            "the Recent Episodic Trace or omit required parameter keys) and output strictly a single "
-            "JSON object with keys \"action\" and \"parameters\"."
+            "the Recent Episodic Trace or omit required parameter keys) and output strictly ONE "
+            "complete, balanced JSON object with keys \"action\" and \"parameters\" (no markdown code fences)."
         )
         return "\n".join(lines)

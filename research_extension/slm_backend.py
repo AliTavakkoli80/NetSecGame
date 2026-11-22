@@ -6,7 +6,7 @@ Implements:
   JSON object `{...}` closes, preventing post-JSON rambling.
 - Static Prompt Prefix KV-Caching: caches the tokenized & KV-encoded static system
   instruction prefix across steps so each step only prefills the dynamic state tokens.
-- Greedy decoding (`do_sample=False`) with tightened `max_new_tokens=80`.
+- Greedy decoding (`do_sample=False`) with `max_new_tokens=160` (halted early on `}`).
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ class SLMConfig:
     backend: str = "huggingface"  # "huggingface" or "mock"
     quantization: Optional[str] = None  # None ("bfloat16") or "4bit"
     temperature: float = 0.0
-    max_new_tokens: int = 80
+    max_new_tokens: int = 160
     use_memory: bool = True
     enable_action_masking: bool = True
     enable_stealth_pacing: bool = True
@@ -101,7 +101,7 @@ class AbstractSLMBackend(ABC):
         self,
         messages: List[Dict[str, str]],
         temperature: float = 0.0,
-        max_new_tokens: int = 80,
+        max_new_tokens: int = 160,
     ) -> Tuple[str, float, int]:
         """Generate response text and return (raw_text, latency_ms, tokens_generated)."""
 
@@ -117,27 +117,51 @@ class AbstractSLMBackend(ABC):
         if fence_match:
             candidates.append(fence_match.group(1))
 
+        # String-literal and escape-aware balanced-brace scanner matching FirstJsonObjectStoppingCriteria.
+        repaired_candidates: List[str] = []
         for idx, ch in enumerate(cleaned):
-            if ch == "{":
-                depth = 0
-                for end_idx in range(idx, len(cleaned)):
-                    c = cleaned[end_idx]
-                    if c == "{":
-                        depth += 1
-                    elif c == "}":
-                        depth -= 1
-                        if depth == 0:
-                            candidates.append(cleaned[idx : end_idx + 1])
-                            break
+            if ch != "{":
+                continue
+            depth = 0
+            in_string = False
+            escaped = False
+            balanced = False
+            for end_idx in range(idx, len(cleaned)):
+                c = cleaned[end_idx]
+                if escaped:
+                    escaped = False
+                    continue
+                if c == "\\" and in_string:
+                    escaped = True
+                    continue
+                if c == '"':
+                    in_string = not in_string
+                    continue
+                if in_string:
+                    continue
+                if c == "{":
+                    depth += 1
+                elif c == "}":
+                    depth -= 1
+                    if depth == 0:
+                        candidates.append(cleaned[idx : end_idx + 1])
+                        balanced = True
+                        break
+            if not balanced and not in_string and 1 <= depth <= 3:
+                repaired_candidates.append(cleaned[idx:] + ("}" * depth))
 
-        for cand in candidates:
+        fallback_dict: Optional[Dict[str, Any]] = None
+        for cand in candidates + repaired_candidates:
             try:
                 parsed = json.loads(cand)
                 if isinstance(parsed, dict):
-                    return parsed
+                    if "action" in parsed:
+                        return parsed
+                    if fallback_dict is None:
+                        fallback_dict = parsed
             except json.JSONDecodeError:
                 continue
-        return None
+        return fallback_dict
 
 
 class HuggingFaceSLMBackend(AbstractSLMBackend):
@@ -221,7 +245,7 @@ class HuggingFaceSLMBackend(AbstractSLMBackend):
         self,
         messages: List[Dict[str, str]],
         temperature: float = 0.0,
-        max_new_tokens: int = 80,
+        max_new_tokens: int = 160,
     ) -> Tuple[str, float, int]:
         start_t = time.perf_counter()
         prompt_text = self._render_prompt(messages)
@@ -298,7 +322,7 @@ class MockSLMBackend(AbstractSLMBackend):
         self,
         messages: List[Dict[str, str]],
         temperature: float = 0.0,
-        max_new_tokens: int = 80,
+        max_new_tokens: int = 160,
     ) -> Tuple[str, float, int]:
         if self._call_idx < len(self.scripted_responses):
             resp = self.scripted_responses[self._call_idx]

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import sys
 from typing import Iterable, Optional, Tuple
 
 import matplotlib
@@ -26,6 +27,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch, Rectangle
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from research_extension.memory_module import SemanticMemoryStore
 
 # Elsevier ESWA print typography: Computer Modern math + serif text + TrueType PDF embedding
 plt.rcParams.update({
@@ -419,14 +426,14 @@ def plot_fig1_system_architecture(out_dir: Path) -> None:
         zorder=2.0,
     )
     # Framed core equation
-    _draw_subpill(ax, col_right_x0 + 0.14, 3.50, col_w - 0.28, 0.45, BG_CONTAINER, BORDER_SUBTLE, lw=0.75, rounding=0.05, zorder=2.5)
+    _draw_subpill(ax, col_right_x0 + 0.10, 3.50, col_w - 0.20, 0.45, BG_CONTAINER, BORDER_SUBTLE, lw=0.75, rounding=0.05, zorder=2.5)
     ax.text(
         right_cx,
         3.72,
-        "$U(a) = \\alpha\\, G(a \\mid \\mathcal{G}_t) - \\beta \\max_{w \\in \\{3,5,8\\}} R_w(a \\mid \\mathcal{H}_t)$",
+        "$U(a) = \\alpha\\,\\mathrm{ProgressGain}(a \\mid \\mathcal{G}_t) - \\beta \\max_{w \\in \\{3,5,8\\}} R_w(a \\mid \\mathcal{H}_t)$",
         ha="center",
         va="center",
-        fontsize=7.9,
+        fontsize=6.95,
         color=TEXT_PRIMARY,
         zorder=4.0,
     )
@@ -449,7 +456,7 @@ def plot_fig1_system_architecture(out_dir: Path) -> None:
         header_h=0.35,
         zorder=2.0,
     )
-    ax.text(right_cx, 1.41, "Qwen2.5-Coder: 7B-NF4 (5.95 GB) / 1.5B (3.24 GB)", ha="center", va="center", fontsize=7.0, fontweight="bold", color=TEXT_PRIMARY, zorder=4.0)
+    ax.text(right_cx, 1.41, "Qwen2.5-Coder: 7B-NF4 (5.92 GB) / 1.5B (3.22 GB)", ha="center", va="center", fontsize=7.0, fontweight="bold", color=TEXT_PRIMARY, zorder=4.0)
     ax.text(right_cx, 1.11, "Static System-Prefix KV-Cache (prefills state only)", ha="center", va="center", fontsize=7.2, color=TEXT_MUTED, zorder=4.0)
     ax.text(right_cx, 0.83, "Balanced JSON-Brace Early Stopping (greedy $T=0$)", ha="center", va="center", fontsize=7.2, color=TEXT_MUTED, zorder=4.0)
     ax.text(right_cx, 0.56, "Autonomous selection from unmasked frontier", ha="center", va="center", fontsize=7.2, fontweight="bold", color=INDIGO_SLM, zorder=4.0)
@@ -738,7 +745,7 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
             TEAL_UTILITY,
             TEAL_UTILITY,
             "$h \\in \\mathcal{K}_t^{\\mathrm{ctrl}}$",
-            "Active pivot & data search",
+            "Active pivot & data_searched",
         ),
         (
             1.15,
@@ -863,51 +870,71 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
         pad=0.12,
     )
 
-    # 5. COMPROMISED -> EXHAUSTED (bottom horizontal dashed transition when local edges pruned)
-    _draw_polyline_arrow(
-        ax1,
-        [(4.85 - sw * 0.5, 0.70), (1.15 + sw * 0.5, 0.70)],
-        color=TEXT_MUTED,
-        lw=1.05,
-        ls="--",
-        mutation_scale=10.5,
-        zorder=3.2,
-    )
-    _draw_label_pill(
-        ax1,
-        3.00,
-        0.38,
-        "FindData + Exfil\n[local edges pruned]",
-        color=TEXT_MUTED,
-        fontsize=6.7,
-        fc=BG_WHITE,
-        pad=0.10,
-    )
-
     ax1.set_title("(a) Epistemic Host Lifecycle in $\\mathcal{G}_t$", fontweight="bold", pad=10, color=TEXT_PRIMARY)
 
     # =========================================================================
     # PANEL (b): Multi-Scale Minimax Hazard Utility U(a) (w in {3, 5, 8})
     # =========================================================================
-    # Ordered bottom-to-top so highest-utility preferred actions sit at top
-    actions = [
-        "ScanNetwork\n(Repeat Window)",
-        "FindServices\n(Consec. Burst)",
-        "ExfiltrateData\n(Clustered $< w$)",
-        "ExploitService\n(Interleaved)",
-        "FindData\n(Fresh Host)",
-        "ExfiltrateData\n(Spaced $\\geq w$)",
+    # Dynamically evaluate all 5 action bars via SemanticMemoryStore (zero hardcoding)
+    beta_val = 1.2
+    specs = [
+        (
+            "ScanNetwork\n(Repeat $w=3$)",
+            ["ScanNetwork", "FindServices"],
+            "ScanNetwork",
+            None,
+            None,
+        ),
+        (
+            "FindServices\n(Repeat $w=5$)",
+            ["FindServices", "FindServices", "ScanNetwork", "ExploitService"],
+            "FindServices",
+            {"target_host": "unprobed_host"},
+            None,
+        ),
+        (
+            "ExploitService\n(Interleaved)",
+            ["ScanNetwork", "FindServices"],
+            "ExploitService",
+            None,
+            None,
+        ),
+        (
+            "FindData\n(Fresh Host)",
+            ["ScanNetwork", "ExploitService"],
+            "FindData",
+            None,
+            None,
+        ),
+        (
+            "ExfiltrateData\n(Spaced $\\geq w$)",
+            ["ScanNetwork", "FindServices"],
+            "ExfiltrateData",
+            {"target_host": "goal_host"},
+            "goal_host",
+        ),
     ]
-    gains = np.array([0.22, 0.42, 1.08, 0.62, 0.80, 1.08])
-    hazards = np.array([0.67, 0.55, 1.00, 0.20, 0.20, 0.20])
-    penalties = -1.2 * hazards
-    utilities = gains + penalties
+    actions, gains_list, penalties_list, utilities_list = [], [], [], []
+    for label, hist, act, params, goal_ip in specs:
+        mem = SemanticMemoryStore(enable_stealth_pacing=True)
+        mem.action_history = list(hist)
+        if goal_ip:
+            mem.goal_target_ip = goal_ip
+        u_val, g_val, h_val = mem.compute_minimax_hazard_utility(act, params, alpha=1.0, beta=beta_val)
+        actions.append(label)
+        gains_list.append(g_val)
+        penalties_list.append(round(-beta_val * h_val, 4))
+        utilities_list.append(u_val)
+
+    gains = np.asarray(gains_list, dtype=float)
+    penalties = np.asarray(penalties_list, dtype=float)
+    utilities = np.asarray(utilities_list, dtype=float)
 
     y = np.arange(len(actions))
     h_bar = 0.24
 
     # Subtle decision-region shading behind bars (explicit low zorder)
-    ax2.axvspan(-1.60, 0.0, facecolor=CRIMSON_TINT, alpha=0.45, zorder=0.2)
+    ax2.axvspan(-1.25, 0.0, facecolor=CRIMSON_TINT, alpha=0.45, zorder=0.2)
     ax2.axvspan(0.0, 1.48, facecolor=TEAL_TINT, alpha=0.45, zorder=0.2)
     ax2.grid(axis="x", linestyle="--", color=GRID_LIGHT, alpha=0.85, zorder=0.5)
 
@@ -918,7 +945,7 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
         height=h_bar,
         color=SLATE_GAIN,
         alpha=0.92,
-        label="$\\alpha \\cdot \\mathrm{ProgressGain}(a)$",
+        label="$\\alpha \\cdot \\mathrm{ProgressGain}(a \\mid \\mathcal{G}_t)$",
         zorder=2.5,
     )
     ax2.barh(
@@ -927,7 +954,7 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
         height=h_bar,
         color=CRIMSON_HAZARD,
         alpha=0.88,
-        label="$-\\beta \\max_{w\\in\\{3,5,8\\}} R_w(a)$",
+        label="$-\\beta \\max_{w\\in\\{3,5,8\\}} R_w(a \\mid \\mathcal{H}_t)$",
         zorder=2.5,
     )
     ax2.barh(
@@ -944,11 +971,11 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
     ax2.axvline(0.0, color=INK_DARK, linewidth=0.95, zorder=3.0)
 
     # Decision-region headers at top of plot
-    ax2.text(-0.76, 5.56, "Suppressed ($U < 0$)", ha="center", va="center", fontsize=7.2, fontweight="bold", color=CRIMSON_HAZARD, zorder=3.5)
-    ax2.text(0.74, 5.56, "Preferred Interleaving ($U > 0$)", ha="center", va="center", fontsize=7.2, fontweight="bold", color=TEAL_UTILITY, zorder=3.5)
+    ax2.text(-0.62, 4.58, "Suppressed ($U < 0$)", ha="center", va="center", fontsize=7.2, fontweight="bold", color=CRIMSON_HAZARD, zorder=3.5)
+    ax2.text(0.74, 4.58, "Preferred Interleaving ($U > 0$)", ha="center", va="center", fontsize=7.2, fontweight="bold", color=TEAL_UTILITY, zorder=3.5)
 
-    # Subtle horizontal separator between suppressed (0..2) and preferred (3..5) groups
-    ax2.axhline(2.5, color=BORDER_SUBTLE, linewidth=0.85, linestyle=":", zorder=1.2)
+    # Subtle horizontal separator between suppressed (0..1) and preferred (2..4) groups
+    ax2.axhline(1.5, color=BORDER_SUBTLE, linewidth=0.85, linestyle=":", zorder=1.2)
 
     # Crisp tip labels
     for idx, (g_val, p_val, u_val) in enumerate(zip(gains, penalties, utilities)):
@@ -989,8 +1016,8 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
 
     ax2.set_yticks(y)
     ax2.set_yticklabels(actions, fontsize=7.5, color=TEXT_PRIMARY)
-    ax2.set_ylim(-0.62, 5.82)
-    ax2.set_xlim(-1.60, 1.44)
+    ax2.set_ylim(-0.62, 4.84)
+    ax2.set_xlim(-1.25, 1.44)
     ax2.set_xlabel("Decision Utility / Component Score ($\\alpha = 1.0,\\, \\beta = 1.2$)", color=TEXT_PRIMARY)
     ax2.set_title("(b) Multi-Scale Minimax Utility $U(a)$ ($w \\in \\{3, 5, 8\\}$)", fontweight="bold", pad=10, color=TEXT_PRIMARY)
 

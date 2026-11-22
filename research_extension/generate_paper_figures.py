@@ -27,12 +27,12 @@ plt.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["DejaVu Sans"],
     "mathtext.fontset": "stix",
-    "font.size": 9.5,
-    "axes.titlesize": 10.2,
-    "axes.labelsize": 9.0,
-    "xtick.labelsize": 8.0,
-    "ytick.labelsize": 8.2,
-    "legend.fontsize": 7.8,
+    "font.size": 10.0,
+    "axes.titlesize": 10.6,
+    "axes.labelsize": 9.6,
+    "xtick.labelsize": 8.4,
+    "ytick.labelsize": 8.4,
+    "legend.fontsize": 8.2,
     "axes.spines.top": False,
     "axes.spines.right": False,
     "axes.edgecolor": "#334155",
@@ -128,9 +128,14 @@ def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
         ("Prop\n7B", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth_metrics.json"),
     ]
 
-    fig = plt.figure(figsize=(16.2, 5.0))
-    gs = fig.add_gridspec(1, 3, width_ratios=[1.35, 1.35, 0.92], wspace=0.22)
+    fig = plt.figure(figsize=(13.6, 4.35))
+    gs = fig.add_gridspec(1, 3, width_ratios=[1.38, 1.38, 0.94], wspace=0.22)
     axes = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[0, 2])]
+
+    def _fmt_pct(val: float) -> str:
+        if 0.0 < val < 1.0:
+            return f"{val:.2f}".rstrip("0").rstrip(".")
+        return f"{val:.1f}"
 
     x = np.arange(len(configs))
     width = 0.38
@@ -176,10 +181,10 @@ def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 h + ci + 2.0,
-                f"{h:.1f}",
+                _fmt_pct(h),
                 ha="center",
                 va="bottom",
-                fontsize=6.5,
+                fontsize=6.8,
                 color=TEAL_ACCENT,
                 fontweight="bold",
                 zorder=3.5,
@@ -189,10 +194,10 @@ def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 h + ci + 2.0,
-                f"{h:.1f}",
+                _fmt_pct(h),
                 ha="center",
                 va="bottom",
-                fontsize=6.5,
+                fontsize=6.8,
                 color=CRIMSON_ACCENT,
                 fontweight="bold",
                 zorder=3.5,
@@ -253,7 +258,7 @@ def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
     ax_c.set_title("(c) SLM Autonomy Breakdown", fontweight="bold", pad=8, color=TEXT_DARK)
     ax_c.set_xticks(xc)
     ax_c.set_xticklabels([c[0] for c in aut_configs], fontsize=8.0, color=TEXT_DARK)
-    ax_c.set_ylim(0, 126)
+    ax_c.set_ylim(0, 132)
     ax_c.set_yticks([0, 20, 40, 60, 80, 100])
     ax_c.set_ylabel("Share of Executed Steps (%)", color=TEXT_DARK)
     ax_c.grid(axis="y", linestyle="--", color=SUBTLE_BORDER, alpha=0.70, zorder=0.5)
@@ -281,7 +286,7 @@ def plot_fig4_markov_transitions(suite_root: Path, out_dir: Path) -> None:
         ("BeliefGraph + Minimax Utility (7B-NF4)", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth_steps.csv"),
     ]
 
-    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.8), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(13.2, 4.25), sharey=True)
     short_labels = ["Start", "Scan", "FindSrv", "Exploit", "FindData", "Exfil", "Invalid"]
 
     im = None
@@ -321,7 +326,7 @@ def plot_fig5_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
     stat_data = json.loads(stat_path.read_text(encoding="utf-8")) if stat_path.exists() else {}
     r2b_ent = stat_data.get("regimes", {}).get("regime2b_threenets_defender", {}).get("entropy_and_phases", {})
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14.2, 4.9))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.6, 4.5))
 
     series = [
         ("RawReAct (7B-NF4)", "Ablation_SLM_7B_NF4_RawReAct", SLATE_ACCENT, "--"),
@@ -350,8 +355,8 @@ def plot_fig5_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
     ax1.set_ylim(-0.06, 2.42)
     ax1.grid(True, linestyle="--", color=SUBTLE_BORDER, alpha=0.70, zorder=0.5)
     ax1.legend(
-        loc="lower right",
-        bbox_to_anchor=(0.98, 0.06),
+        loc="lower left",
+        bbox_to_anchor=(0.04, 0.04),
         frameon=True,
         facecolor="#FFFFFF",
         edgecolor=SUBTLE_BORDER,
@@ -405,7 +410,7 @@ def plot_fig5_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
     ax2.annotate(
         f"Proposed 1.5B-BF16 (Ours)\n{vram_15:.2f} GB, {win_15:.1f}% ({lat_15:.0f} ms/step)",
         xy=(vram_15, win_15),
-        xytext=(0.75, 58.0),
+        xytext=(0.35, 69.5),
         fontsize=7.8,
         color=BLUE_ACCENT,
         fontweight="bold",

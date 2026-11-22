@@ -297,7 +297,10 @@ def test_active_stealth_pacing_soft_masking_and_deadlock_safety() -> None:
     sem_paced.record_action_outcome(
         "FindData", {"source_host": "172.16.44.10", "target_host": "172.16.44.10"}, "success"
     )
-    # Also ensure ScanNetwork is still high risk by adding one more ScanNetwork in window.
+    # Also ensure ScanNetwork is still high risk inside w=3 by recording another ScanNetwork.
+    sem_paced.record_action_outcome(
+        "ScanNetwork", {"source_host": "172.16.44.10", "target_network": "172.16.43.0/24"}, "success"
+    )
     fallback_actions = sem_paced.get_valid_action_space(scan_only_state)
     assert len(fallback_actions) == 1
     assert fallback_actions[0]["action"] == "ScanNetwork"
@@ -331,32 +334,42 @@ def test_depth_first_interleaved_streak_breaking() -> None:
 
 
 def test_exfiltrate_window_frequency_spacing() -> None:
-    """Verify ExfiltrateData is flagged high-risk if executed within the last W=5 steps."""
+    """Verify ExfiltrateData is flagged high-risk across the max minimax window (w=8) without W=5 oracle tables."""
+    assert not hasattr(SemanticMemoryStore, "SIEM_RATIO_THRESHOLDS")
+    assert not hasattr(SemanticMemoryStore, "SIEM_CONSECUTIVE_THRESHOLDS")
+
     sem = SemanticMemoryStore(stealth_window=5, enable_stealth_pacing=True)
+    assert sem.hazard_windows == (3, 5, 8)
     assert sem.is_action_high_stealth_risk("ExfiltrateData") is False
 
-    # After 1 ExfiltrateData, executing another within W=5 steps is deferred
+    # After 1 ExfiltrateData, executing another within max(hazard_windows)=8 steps is deferred
     sem.record_action_outcome(
         "ExfiltrateData", {"source_host": "172.16.44.20", "target_host": "172.16.44.10"}, "success"
     )
     assert sem.is_action_high_stealth_risk("ExfiltrateData") is True
 
-    # After 4 non-ExfiltrateData steps (5th step in window is still ExfiltrateData), still flagged
-    for _ in range(4):
+    # After 7 non-ExfiltrateData steps (ExfiltrateData is still inside the w=8 minimax window), still flagged
+    for _ in range(7):
         sem.record_action_outcome("FindData", {"source_host": "172.16.44.20", "target_host": "172.16.44.20"}, "success")
     assert sem.is_action_high_stealth_risk("ExfiltrateData") is True
 
-    # After a 5th non-ExfiltrateData step, ExfiltrateData leaves the W=5 history window
+    # After an 8th non-ExfiltrateData step, ExfiltrateData leaves the w=8 horizon
     sem.record_action_outcome("FindData", {"source_host": "172.16.44.20", "target_host": "172.16.44.20"}, "success")
     assert sem.is_action_high_stealth_risk("ExfiltrateData") is False
 
 
 def test_first_json_object_stopping_criteria() -> None:
-    """Verify balanced JSON object detection handles nested braces and string literals."""
-    from research_extension.slm_backend import FirstJsonObjectStoppingCriteria
+    """Verify balanced JSON detection & extract_json handle nested braces, string literals, and default max_new_tokens=160."""
+    from research_extension.slm_backend import AbstractSLMBackend, FirstJsonObjectStoppingCriteria
 
+    assert SLMConfig().max_new_tokens == 160
     assert FirstJsonObjectStoppingCriteria.has_complete_json_object('{"action": "ScanNetwork", ') is False
-    assert FirstJsonObjectStoppingCriteria.has_complete_json_object('{"action": "ScanNetwork", "parameters": {"a": "}"}}') is True
+    sample = '{"action": "ScanNetwork", "parameters": {"a": "}"}, "note": "x\\"}"}'
+    assert FirstJsonObjectStoppingCriteria.has_complete_json_object(sample) is True
+    parsed = AbstractSLMBackend.extract_json(sample + " trailing text")
+    assert parsed is not None
+    assert parsed["action"] == "ScanNetwork"
+    assert parsed["parameters"]["a"] == "}"
 
 
 def test_multiscale_minimax_hazard_utility() -> None:
@@ -406,3 +419,71 @@ def test_one_step_counterfactual_reflexion() -> None:
     assert attacker.last_decision_metadata["post_reflexion_valid"] is True
     assert attacker.last_decision_metadata["reflexion_triggered"] is True
     assert attacker.last_decision_metadata["was_overridden"] is False
+
+
+def test_extract_json_recovers_missing_trailing_brace() -> None:
+    """Verify extract_json() repairs 3-level nested ExfiltrateData JSON truncated at EOS by 1 closing brace."""
+    from research_extension.slm_backend import AbstractSLMBackend
+
+    truncated = (
+        '{"action":"ExfiltrateData","parameters":{"source_host":"10.52.123.4",'
+        '"target_host":"216.205.10.67","data":{"owner":"system","id":"logfile"}}'
+    )
+    parsed = AbstractSLMBackend.extract_json(truncated)
+    assert parsed is not None
+    assert parsed["action"] == "ExfiltrateData"
+    assert parsed["parameters"]["data"]["id"] == "logfile"
+
+
+def test_nostealth_isolation_utility_and_prompt() -> None:
+    """Verify enable_stealth_pacing=False defaults beta=0.0 and omits stealth advisory & stealth_risk."""
+    from netsecgame.game_components import GameState, IP, Network, Observation
+
+    sem = SemanticMemoryStore(stealth_window=5, enable_stealth_pacing=False)
+    sem.record_action_outcome(
+        "FindServices", {"source_host": "10.0.0.1", "target_host": "10.0.0.2"}, "success"
+    )
+    utility, gain, max_hazard = sem.compute_minimax_hazard_utility(
+        "FindServices", {"source_host": "10.0.0.1", "target_host": "10.0.0.3"}
+    )
+    assert max_hazard > 0.0
+    assert utility == gain
+
+    state = GameState(
+        controlled_hosts={IP("10.0.0.1")},
+        known_hosts={IP("10.0.0.1"), IP("10.0.0.3")},
+        known_networks={Network("10.0.0.0", 24)},
+        known_services={},
+        known_data={},
+        known_blocks={},
+    )
+    obs = Observation(state=state, reward=0.0, end=False, info={})
+    prompt = sem.format_context_prompt(obs)
+    assert "TEMPORAL STEALTH ADVISORY" not in prompt
+    assert "stealth_risk" not in prompt
+
+
+def test_prompt_candidate_parameters_valid_json() -> None:
+    """Verify candidate action parameters in format_context_prompt() are valid double-quoted JSON."""
+    import json
+    import re
+    from netsecgame.game_components import GameState, IP, Network, Observation
+
+    state = GameState(
+        controlled_hosts={IP("10.0.0.5")},
+        known_hosts={IP("10.0.0.5")},
+        known_networks={Network("10.0.0.0", 24)},
+        known_services={},
+        known_data={},
+        known_blocks={},
+    )
+    obs = Observation(state=state, reward=0.0, end=False, info={})
+    for pacing in (True, False):
+        sem = SemanticMemoryStore(stealth_window=5, enable_stealth_pacing=pacing)
+        prompt = sem.format_context_prompt(obs)
+        matches = re.findall(r"parameters=(\{.*?\})(?:\s*\||$)", prompt, flags=re.MULTILINE)
+        assert matches, f"Expected rendered parameters JSON in prompt (pacing={pacing})"
+        for raw_params in matches:
+            parsed = json.loads(raw_params)
+            assert isinstance(parsed, dict)
+

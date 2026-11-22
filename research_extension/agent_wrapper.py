@@ -81,13 +81,15 @@ class ModernSLMAttacker(BaseModularAgent):
         "detection.\n"
         "Valid NetSecGame action types: ScanNetwork, FindServices, ExploitService, FindData, "
         "ExfiltrateData.\n"
-        "Respond strictly with ONE valid JSON object containing keys \"action\" and \"parameters\". "
-        "Do not output prose outside the JSON object."
+        "Respond strictly with ONE compact single-line JSON object containing keys \"action\" and \"parameters\" "
+        "(ensure every opening '{' has a matching closing '}'). Do not wrap in markdown code fences "
+        "or output prose outside the JSON object."
     )
 
     REFLEXION_CORRECTION_MSG = (
-        "Action rejected: already executed or invalid parameters. "
-        "Select strictly from the listed permissible actions and output ONE valid JSON object."
+        "Action rejected: malformed/incomplete JSON, already executed, or invalid parameters. "
+        "Select strictly from the listed permissible actions and output ONE complete, balanced JSON "
+        "object with NO markdown code fences."
     )
 
     def __init__(
