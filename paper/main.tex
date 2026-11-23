@@ -113,8 +113,8 @@ Figure~\ref{fig:arch} overviews \texttt{ModernSLMAttacker}, which decouples exac
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.90\textwidth]{figures/fig1_system_architecture.pdf}
-    \caption{End-to-end cognitive and stealth planning pipeline combining the Topological Belief Graph ($\mathcal{G}_t$), Multi-Scale Minimax Utility ($U(a)$), KV-prefix cached local SLM inference with balanced JSON-brace early stopping, and 1-Step Counterfactual Reflexion.}
+    \includegraphics[width=0.92\textwidth]{figures/fig1_system_architecture.pdf}
+    \caption{Closed-loop cognitive and stealth planning architecture of \texttt{ModernSLMAttacker} (training-free, zero hardcoding) coupled to the \texttt{NetSecGame} C-POMDP environment, integrating (A) the Topological Belief Graph ($\mathcal{G}_t$), (B) Multi-Scale Minimax Hazard Utility ($U(a)$), (C) KV-prefix cached local SLM inference with balanced JSON-brace early stopping, and (D) validation, 1-Step Counterfactual Reflexion, and deadlock-safe fallback.}
     \label{fig:arch}
 \end{figure*}
 
@@ -127,7 +127,7 @@ Because per-episode IP randomization defeats raw text memory, \texttt{SemanticMe
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.90\textwidth]{figures/fig2_belief_and_hazard_mechanism.pdf}
+    \includegraphics[width=0.92\textwidth]{figures/fig2_belief_and_hazard_mechanism.pdf}
     \caption{(a) Epistemic host lifecycle state machine inside the Topological Belief Graph $\mathcal{G}_t$, and (b) Multi-Scale Minimax Hazard Utility $U(a)$ decomposition across $w \in \{3, 5, 8\}$ showing burst suppression on \texttt{FindServices}/\texttt{ScanNetwork} versus positive interleaved progression.}
     \label{fig:mechanism}
 \end{figure*}
@@ -345,8 +345,8 @@ Regime & Comparator & McNemar $p$ (Win) & Discordant $(b,c)$ & Wilcoxon $p$ (Ret
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.90\textwidth]{figures/fig3_ablation_and_autonomy.pdf}
-    \caption{(a)--(b) Win Rate (\%) and Monitor Alert Rate (\%) with 95\% confidence intervals across all 7 configurations in \texttt{Full + Monitor On} and \texttt{Three-Networks + Monitor On}; (c) SLM Decision Autonomy Breakdown (\texttt{FirstPassValid~\%}, \texttt{+1-Step Reflexion Gain~\%}, and \texttt{Minimax Override~\%}).}
+    \includegraphics[width=0.92\textwidth]{figures/fig3_ablation_and_autonomy.pdf}
+    \caption{(a)--(b) Win Rate (\%) and Monitor Alert Rate (\%) with 95\% confidence intervals across all 7 configurations ($n=150$ per agent; $n=2{,}000$ for \texttt{Random}) in \texttt{Full + Monitor On} and \texttt{Three-Networks + Monitor On}; (c) SLM Decision Autonomy Breakdown (\texttt{FirstPassValid~\%}, \texttt{+1-Step Reflexion Gain~\%}, and \texttt{Minimax Override~\%}).}
     \label{fig:ablation}
 \end{figure*}
 
@@ -383,15 +383,15 @@ Figure~\ref{fig:markov} explains these gains mechanically on \texttt{Three-Netwo
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.90\textwidth]{figures/fig4_markov_transitions_comparison.pdf}
-    \caption{Empirical 7$\times$7 Markov action-transition probability heatmaps in \texttt{Three-Networks + Monitor On} ($n=150$): \texttt{RawReAct} (left), \texttt{BeliefGraph\_NoStealth} (center), and \texttt{Proposed BeliefGraph + Minimax Utility} (right).}
+    \includegraphics[width=0.92\textwidth]{figures/fig4_markov_transitions_comparison.pdf}
+    \caption{Empirical 7$\times$7 Markov action-transition probability heatmaps in \texttt{Three-Networks + Monitor On} ($n=150$): (a) \texttt{RawReAct}, (b) \texttt{BeliefGraph\_NoStealth}, and (c) \texttt{Proposed BeliefGraph + Minimax Utility}.}
     \label{fig:markov}
 \end{figure*}
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.90\textwidth]{figures/fig5_entropy_and_pareto.pdf}
-    \caption{(a) Sliding-window Shannon action entropy $H_t$ ($w=5$, $t \le 60$ with 95\% CI shading) on \texttt{Three-Networks + Monitor On}, and (b) Hardware-Aware Pareto Frontier comparing peak GPU VRAM (GB), latency, and Win Rate (\%) against ESWA 2026 \texttt{Hackphyr 7B-FP16} and \texttt{GPT-4}.}
+    \includegraphics[width=0.92\textwidth]{figures/fig5_entropy_and_pareto.pdf}
+    \caption{(a) Sliding-window Shannon action entropy $H_t$ ($w=5$, $t \le 60$ with 95\% CI shading) on \texttt{Three-Networks + Monitor On}, and (b) Hardware-Aware Pareto Frontier (peak GPU VRAM vs.\ Win Rate~\% and per-step latency) against ESWA 2026 \texttt{Hackphyr 7B-FP16} and \texttt{GPT-4}.}
     \label{fig:pareto}
 \end{figure*}
 

@@ -34,16 +34,17 @@ if str(_REPO_ROOT) not in sys.path:
 
 from research_extension.memory_module import SemanticMemoryStore
 
-# Elsevier ESWA print typography: Computer Modern math + serif text + TrueType PDF embedding
+# Elsevier ESWA publication typography: DejaVu Sans + STIX math + TrueType PDF embedding
 plt.rcParams.update({
-    "font.family": "serif",
-    "mathtext.fontset": "cm",
+    "font.family": "sans-serif",
+    "font.sans-serif": ["DejaVu Sans"],
+    "mathtext.fontset": "stix",
     "font.size": 8.5,
     "axes.titlesize": 9.5,
     "axes.labelsize": 8.5,
-    "xtick.labelsize": 7.8,
-    "ytick.labelsize": 7.8,
-    "legend.fontsize": 7.6,
+    "xtick.labelsize": 8.0,
+    "ytick.labelsize": 8.0,
+    "legend.fontsize": 7.8,
     "pdf.fonttype": 42,
     "ps.fonttype": 42,
     "figure.dpi": 300,
@@ -273,15 +274,15 @@ def plot_fig1_system_architecture(out_dir: Path) -> None:
     Figure 1: Clockwise closed-loop system architecture of ModernSLMAttacker
     interacting with the NetSecGame C-POMDP environment.
     """
-    fig, ax = plt.subplots(figsize=(11.4, 4.95))
+    fig, ax = plt.subplots(figsize=(10.5, 4.30))
     ax.set_xlim(0.0, 11.4)
-    ax.set_ylim(0.0, 4.95)
+    ax.set_ylim(0.12, 4.68)
     ax.axis("off")
 
     # =========================================================================
     # 1. LEFT COLUMN: NetSecGame C-POMDP Environment
     # =========================================================================
-    env_x0, env_y0, env_w, env_h = 0.15, 0.35, 2.22, 4.25
+    env_x0, env_y0, env_w, env_h = 0.15, 0.35, 2.22, 4.10
     env_cx = env_x0 + env_w * 0.5
     _draw_rounded_card(
         ax,
@@ -303,28 +304,28 @@ def plot_fig1_system_architecture(out_dir: Path) -> None:
     sub_x0, sub_w = env_x0 + 0.13, env_w - 0.26
 
     # Sub-block 1: Dynamic Topology
-    _draw_subpill(ax, sub_x0, 3.16, sub_w, 0.90, BG_CONTAINER, BORDER_SUBTLE, zorder=2.4)
-    ax.text(env_cx, 3.84, "Dynamic Topologies", ha="center", va="center", fontsize=7.8, fontweight="bold", color=TEXT_PRIMARY, zorder=4.0)
-    ax.text(env_cx, 3.56, "Full & Three-Networks", ha="center", va="center", fontsize=7.2, color=TEXT_MUTED, zorder=4.0)
-    ax.text(env_cx, 3.33, "Randomized IPs ($T_{\\max}=100$)", ha="center", va="center", fontsize=7.1, color=TEXT_MUTED, zorder=4.0)
+    _draw_subpill(ax, sub_x0, 3.06, sub_w, 0.88, BG_CONTAINER, BORDER_SUBTLE, zorder=2.4)
+    ax.text(env_cx, 3.74, "Dynamic Topologies", ha="center", va="center", fontsize=7.8, fontweight="bold", color=TEXT_PRIMARY, zorder=4.0)
+    ax.text(env_cx, 3.47, "Full & Three-Networks", ha="center", va="center", fontsize=7.2, color=TEXT_MUTED, zorder=4.0)
+    ax.text(env_cx, 3.23, "Randomized IPs ($T_{\\max}=100$)", ha="center", va="center", fontsize=7.1, color=TEXT_MUTED, zorder=4.0)
 
     # Sub-block 2: Partial Observation
-    _draw_subpill(ax, sub_x0, 1.92, sub_w, 1.06, BG_CONTAINER, BORDER_SUBTLE, zorder=2.4)
-    ax.text(env_cx, 2.77, "Partial Observation $o_t$", ha="center", va="center", fontsize=7.8, fontweight="bold", color=TEXT_PRIMARY, zorder=4.0)
-    ax.text(env_cx, 2.45, "$(\\mathcal{K}_t^{\\mathrm{net}}, \\mathcal{K}_t^{\\mathrm{host}}, \\mathcal{K}_t^{\\mathrm{ctrl}},$", ha="center", va="center", fontsize=7.4, color=TEXT_PRIMARY, zorder=4.0)
-    ax.text(env_cx, 2.15, "$\\mathcal{K}_t^{\\mathrm{srv}}, \\mathcal{K}_t^{\\mathrm{data}}, \\mathcal{K}_t^{\\mathrm{blk}}, g)$", ha="center", va="center", fontsize=7.4, color=TEXT_PRIMARY, zorder=4.0)
+    _draw_subpill(ax, sub_x0, 1.86, sub_w, 1.04, BG_CONTAINER, BORDER_SUBTLE, zorder=2.4)
+    ax.text(env_cx, 2.69, "Partial Observation $o_t$", ha="center", va="center", fontsize=7.8, fontweight="bold", color=TEXT_PRIMARY, zorder=4.0)
+    ax.text(env_cx, 2.38, "$(\\mathcal{K}_t^{\\mathrm{net}}, \\mathcal{K}_t^{\\mathrm{host}}, \\mathcal{K}_t^{\\mathrm{ctrl}},$", ha="center", va="center", fontsize=7.4, color=TEXT_PRIMARY, zorder=4.0)
+    ax.text(env_cx, 2.08, "$\\mathcal{K}_t^{\\mathrm{srv}}, \\mathcal{K}_t^{\\mathrm{data}}, \\mathcal{K}_t^{\\mathrm{blk}}, g)$", ha="center", va="center", fontsize=7.4, color=TEXT_PRIMARY, zorder=4.0)
 
     # Sub-block 3: Active GlobalDefender Monitor
-    _draw_subpill(ax, sub_x0, 0.54, sub_w, 1.18, CRIMSON_TINT, CRIMSON_HAZARD, lw=0.85, zorder=2.4)
-    ax.text(env_cx, 1.49, "GlobalDefender Monitor", ha="center", va="center", fontsize=7.7, fontweight="bold", color=CRIMSON_HAZARD, zorder=4.0)
-    ax.text(env_cx, 1.19, "Hidden Window $W^*$", ha="center", va="center", fontsize=7.3, color=TEXT_PRIMARY, zorder=4.0)
-    ax.text(env_cx, 0.92, "Ratio $\\tau_{\\mathrm{ratio}}$ & Burst $\\tau_{\\mathrm{consec}}$", ha="center", va="center", fontsize=7.0, color=TEXT_MUTED, zorder=4.0)
-    ax.text(env_cx, 0.69, "Alert Penalty ($r = -10$)", ha="center", va="center", fontsize=6.9, color=CRIMSON_HAZARD, zorder=4.0)
+    _draw_subpill(ax, sub_x0, 0.50, sub_w, 1.18, CRIMSON_TINT, CRIMSON_HAZARD, lw=0.85, zorder=2.4)
+    ax.text(env_cx, 1.45, "GlobalDefender Monitor", ha="center", va="center", fontsize=7.7, fontweight="bold", color=CRIMSON_HAZARD, zorder=4.0)
+    ax.text(env_cx, 1.16, "Hidden Window $W^*$", ha="center", va="center", fontsize=7.3, color=TEXT_PRIMARY, zorder=4.0)
+    ax.text(env_cx, 0.90, "Ratio $\\tau_{\\mathrm{ratio}}$ & Burst $\\tau_{\\mathrm{consec}}$", ha="center", va="center", fontsize=7.0, color=TEXT_MUTED, zorder=4.0)
+    ax.text(env_cx, 0.66, "Alert Penalty ($r = -10$)", ha="center", va="center", fontsize=6.9, color=CRIMSON_HAZARD, zorder=4.0)
 
     # =========================================================================
-    # 2. RIGHT ENCLOSURE: ModernSLMAttacker Planner
+    # 2. RIGHT ENCLOSURE: ModernSLMAttacker Planner (no embedded top banner)
     # =========================================================================
-    plan_x0, plan_y0, plan_w, plan_h = 3.05, 0.16, 8.20, 4.64
+    plan_x0, plan_y0, plan_w, plan_h = 3.05, 0.22, 8.20, 4.32
     enclosure = FancyBboxPatch(
         (plan_x0, plan_y0),
         plan_w,
@@ -337,30 +338,6 @@ def plot_fig1_system_architecture(out_dir: Path) -> None:
         zorder=1.0,
     )
     ax.add_patch(enclosure)
-
-    # Enclosure Title Banner (top-left) + Tag (top-right)
-    ax.text(
-        plan_x0 + 0.18,
-        plan_y0 + plan_h - 0.17,
-        "ModernSLMAttacker — Zero-Shot Cognitive & Stealth Planner",
-        ha="left",
-        va="center",
-        fontsize=8.5,
-        fontweight="bold",
-        color=TEXT_PRIMARY,
-        zorder=4.0,
-    )
-    ax.text(
-        plan_x0 + plan_w - 0.18,
-        plan_y0 + plan_h - 0.17,
-        "Training-Free  |  Zero Hardcoding",
-        ha="right",
-        va="center",
-        fontsize=7.3,
-        fontstyle="italic",
-        color=TEXT_MUTED,
-        zorder=4.0,
-    )
 
     # Grid geometry for the 4 modules (A, B on top; D, C on bottom -> clockwise loop)
     col_left_x0 = 3.24
@@ -665,7 +642,7 @@ def plot_fig1_system_architecture(out_dir: Path) -> None:
             out_dir / f"fig1_system_architecture.{ext}",
             dpi=300,
             bbox_inches="tight",
-            pad_inches=0.12,
+            pad_inches=0.05,
         )
     plt.close(fig)
 
@@ -676,7 +653,7 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
     (a) Epistemic host lifecycle state machine inside Topological Belief Graph G_t.
     (b) Multi-Scale Minimax Hazard Utility U(a) decomposition across w in {3, 5, 8}.
     """
-    fig = plt.figure(figsize=(11.4, 4.45))
+    fig = plt.figure(figsize=(10.5, 4.15))
     gs = fig.add_gridspec(1, 2, width_ratios=[0.49, 0.51], wspace=0.33)
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1])
@@ -715,7 +692,7 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
     )
 
     # Four epistemic host state cards
-    sw, sh = 2.04, 1.08
+    sw, sh = 2.22, 1.08
     states = [
         (
             1.15,
@@ -777,8 +754,8 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
             title_fontsize=7.8,
             zorder=2.0,
         )
-        ax1.text(cx, y0 + 0.50, formula, ha="center", va="center", fontsize=7.9, color=TEXT_PRIMARY, zorder=4.0)
-        ax1.text(cx, y0 + 0.20, desc, ha="center", va="center", fontsize=6.9, color=TEXT_MUTED, zorder=4.0)
+        ax1.text(cx, y0 + 0.50, formula, ha="center", va="center", fontsize=7.8, color=TEXT_PRIMARY, zorder=4.0)
+        ax1.text(cx, y0 + 0.20, desc, ha="center", va="center", fontsize=6.4, color=TEXT_MUTED, zorder=4.0)
 
     # 1. UNEXPLORED -> MAPPED (top horizontal)
     _draw_polyline_arrow(
@@ -846,8 +823,8 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
 
     # 4. MAPPED -> EXHAUSTED (clean diagonal dashed transition when all exploits fail)
     diag_arrow = FancyArrowPatch(
-        (3.83, 2.36),
-        (2.17, 1.24),
+        (3.74, 2.36),
+        (2.26, 1.24),
         arrowstyle="-|>",
         color=CRIMSON_HAZARD,
         linewidth=1.0,
@@ -934,8 +911,8 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
     h_bar = 0.24
 
     # Subtle decision-region shading behind bars (explicit low zorder)
-    ax2.axvspan(-1.25, 0.0, facecolor=CRIMSON_TINT, alpha=0.45, zorder=0.2)
-    ax2.axvspan(0.0, 1.48, facecolor=TEAL_TINT, alpha=0.45, zorder=0.2)
+    ax2.axvspan(-1.32, 0.0, facecolor=CRIMSON_TINT, alpha=0.45, zorder=0.2)
+    ax2.axvspan(0.0, 1.50, facecolor=TEAL_TINT, alpha=0.45, zorder=0.2)
     ax2.grid(axis="x", linestyle="--", color=GRID_LIGHT, alpha=0.85, zorder=0.5)
 
     # Grouped horizontal bars with explicit zorder
@@ -1015,11 +992,11 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
         )
 
     ax2.set_yticks(y)
-    ax2.set_yticklabels(actions, fontsize=7.5, color=TEXT_PRIMARY)
+    ax2.set_yticklabels(actions, fontsize=7.8, color=TEXT_PRIMARY)
     ax2.set_ylim(-0.62, 4.84)
-    ax2.set_xlim(-1.25, 1.44)
+    ax2.set_xlim(-1.32, 1.50)
     ax2.set_xlabel("Decision Utility / Component Score ($\\alpha = 1.0,\\, \\beta = 1.2$)", color=TEXT_PRIMARY)
-    ax2.set_title("(b) Multi-Scale Minimax Utility $U(a)$ ($w \\in \\{3, 5, 8\\}$)", fontweight="bold", pad=10, color=TEXT_PRIMARY)
+    ax2.set_title("(b) Multi-Scale Minimax Hazard Utility $U(a)$", fontweight="bold", pad=10, color=TEXT_PRIMARY)
 
     ax2.spines["top"].set_visible(False)
     ax2.spines["right"].set_visible(False)
@@ -1031,7 +1008,7 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
     # Clean horizontal legend below x-axis (zero overlap with bars or labels)
     ax2.legend(
         loc="upper center",
-        bbox_to_anchor=(0.48, -0.17),
+        bbox_to_anchor=(0.48, -0.20),
         ncol=3,
         fontsize=7.3,
         handlelength=1.25,
@@ -1042,13 +1019,13 @@ def plot_fig2_belief_and_hazard_mechanism(out_dir: Path) -> None:
         framealpha=0.98,
     )
 
-    fig.subplots_adjust(left=0.02, right=0.985, top=0.89, bottom=0.19)
+    fig.subplots_adjust(left=0.02, right=0.985, top=0.89, bottom=0.21)
     for ext in ("png", "pdf", "svg"):
         fig.savefig(
             out_dir / f"fig2_belief_and_hazard_mechanism.{ext}",
             dpi=300,
             bbox_inches="tight",
-            pad_inches=0.12,
+            pad_inches=0.05,
         )
     plt.close(fig)
 
