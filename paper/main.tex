@@ -1,156 +1,133 @@
-\documentclass[preprint,12pt]{elsarticle}
+\documentclass[a4paper,fleqn]{cas-dc}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{booktabs}
-\usepackage{multirow}
-\usepackage{graphicx}
-\usepackage{subcaption}
+\usepackage[authoryear]{natbib}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{xcolor}
-\usepackage{hyperref}
-
-\setlength{\emergencystretch}{3em}
-
-\journal{Expert Systems with Applications}
+\renewcommand{\bibfont}{\footnotesize}
+\setlength{\bibsep}{2pt plus 0.5pt}
 
 \begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+\setlength{\emergencystretch}{3em}
+\setlength{\dbltextfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
 
-\begin{frontmatter}
+\shorttitle{Note on Zero-Shot Stealth-Aware Cyber Planning with Local SLMs}
+\shortauthors{A. Tavakkoli}
 
-\title{Zero-Shot Stealth-Aware Cyber Planning with Local Small Language Models via Topological Belief Graphs and Multi-Scale Minimax Hazard Utility}
+\title[mode = title]{Zero-Shot Stealth-Aware Cyber Planning with Local Small Language Models: A Note on Topological Belief Graphs and Minimax Hazard Utility}
 
-\author[inst1]{Ali Tavakkoli}
+\author[1]{Ali Tavakkoli}
+\cormark[1]
 \ead{alitavakkoli80@gmail.com}
+\credit{Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Writing -- original draft, Writing -- review \& editing, Visualization}
 
-\affiliation[inst1]{organization={Independent Cybersecurity and AI Systems Research},
-            city={Tehran},
-            country={Iran}}
+\affiliation[1]{organization={Independent Cybersecurity and AI Systems Research},
+                city={Tehran},
+                country={Iran}}
+
+\cortext[1]{Corresponding author}
 
 \begin{abstract}
-Autonomous sequential decision agents deployed inside enterprise security testbeds face a fundamental tension between reasoning generality, operational stealth, and local compute constraints. Prior studies showed that untuned 7-billion-parameter Small Language Models (SLMs) collapse into repetitive, detectable action loops under partial observability, necessitating parameter-efficient supervised fine-tuning (SFT) such as Hackphyr. However, fine-tuned weights remain brittle when confronted with dynamic topology randomization, unseen multi-subnet pivoting, or active sliding-window security monitors, and typically demand $\approx 14~\text{GB}$ of half-precision GPU memory. We present a strictly domain-agnostic, training-free sequential planning architecture that unlocks zero-shot cyber planning in off-the-shelf local SLMs (\texttt{Qwen2.5-Coder-7B-NF4} and \texttt{1.5B-BF16}). Our framework formulates monitored network traversal as a Constrained Partially Observable Markov Decision Process (C-POMDP) and integrates three synergistic mechanisms: (i) a Topological Belief Graph $\mathcal{G}_t$ that compiles raw discrete observations into epistemic node states (\texttt{UNEXPLORED}, \texttt{MAPPED}, \texttt{COMPROMISED}, \texttt{EXHAUSTED}) to prune redundant transitions without hardcoded domain heuristics; (ii) a Multi-Scale Minimax Hazard Utility function $U(a) = \alpha \cdot \mathrm{ProgressGain}(a \mid \mathcal{G}_t) - \beta \cdot \max_{w \in \{3,5,8\}} R_w(a \mid \mathcal{H}_t)$ that suppresses bursty detection signatures across multiple temporal horizons without assuming knowledge of the monitor's exact window size $W^*$; and (iii) a 1-Step Counterfactual Reflexion loop coupled with balanced JSON-brace early stopping and static prefix KV-caching for low-latency execution. Across 11,600 randomized evaluation episodes spanning four NetSecGame regimes matched to the Rigaki et al. (ESWA 2026) protocol ($n=150$ paired episodes per agent configuration; $n=2{,}000$ for the uniform random baseline), our zero-shot \texttt{7B-NF4} planner achieves a $63.33\% \pm 7.74\%$ win rate in the Full-Topology Monitor-On regime (outperforming fine-tuned \texttt{Hackphyr-7B} at \texttt{44.00\%}, unpaired two-proportion $z$-test $p = 3.40 \times 10^{-4}$, and \texttt{GPT-4} at \texttt{53.33\%}) and $59.33\% \pm 7.89\%$ on the unseen Three-Networks Monitor-On topology (versus \texttt{23.33\%} for \texttt{Hackphyr}, $z$-test $p = 2.43 \times 10^{-10}$, and \texttt{36.36\%} for \texttt{GPT-4}, $z$-test $p = 0.0208$), while requiring at most \texttt{5.92 GB} peak VRAM (\texttt{5.91 GB} under monitoring). A deterministic non-LLM control (\texttt{Ablation\_PureHeuristic\_WithStealth}) confirms that the Minimax Utility scaffold drives stealth evasion (\texttt{71.33\%} and \texttt{65.33\%}), while the \texttt{7B-NF4} SLM achieves statistical win-rate parity in three of four regimes (McNemar $p \ge 0.175$) with higher trajectory diversity ($1.749$--$1.774$ bits) and \texttt{85.76\%--89.63\%} genuine post-reflexion autonomy.
+In \emph{Expert Systems with Applications} (Vol.~299, 129987), \citet{rigaki2026building} established that untuned 7B Small Language Models (SLMs) collapse into repetitive loops on the \texttt{NetSecGame} cyber simulation benchmark, and introduced \texttt{Hackphyr} via QLoRA supervised fine-tuning (SFT). Yet \citet{rigaki2026building} documented three unresolved bottlenecks: severe degradation under active sliding-window defenders (\texttt{44.00\%} win rate on \texttt{Full}; \texttt{23.33\%} on \texttt{Three-Network}), short-term memory collapse across multi-hop chains, and an $\approx 14~\text{GB}$ half-precision VRAM footprint. This Research Note demonstrates that these failures stem from an architectural mismatch between stateless token prediction and constrained graph traversal rather than insufficient domain fine-tuning. We introduce a training-free, strictly domain-agnostic planner for off-the-shelf local SLMs (\texttt{Qwen2.5-Coder-7B-NF4} and \texttt{1.5B-BF16}) combining: (i) a Topological Belief Graph $\mathcal{G}_t$ with four epistemic host states and exhausted-edge pruning; (ii) a Multi-Scale Minimax Hazard Utility $U(a) = \alpha \cdot \mathrm{ProgressGain}(a \mid \mathcal{G}_t) - \beta \cdot \max_{w \in \{3,5,8\}} R_w(a \mid \mathcal{H}_t)$ that suppresses bursty detection signatures across timescales without knowing the defender's window $W^*$; and (iii) 1-Step Counterfactual Reflexion paired with \texttt{FirstJsonObjectStoppingCriteria} (\texttt{max\_new\_tokens=160}), end-of-sequence trailing-brace repair, and static-prefix \texttt{DynamicCache} KV-caching. Across 11,600 randomized evaluation episodes spanning four \texttt{NetSecGame} regimes matched to \citet{rigaki2026building}, zero-shot \texttt{7B-NF4} attains \texttt{63.33\% $\pm$ 7.74\%} on \texttt{Full} with defender (vs.\ \texttt{Hackphyr} \texttt{44.00\%}, unpaired $z$-test $p = 3.40 \times 10^{-4}$; \texttt{GPT-4} \texttt{53.33\%}) and \texttt{59.33\% $\pm$ 7.89\%} on unseen \texttt{Three-Networks} with defender (vs.\ \texttt{Hackphyr} \texttt{23.33\%}, $p = 2.43 \times 10^{-10}$; \texttt{GPT-4} \texttt{36.36\%}, $p = 0.0208$), consuming at most \texttt{5.92 GB} peak VRAM (\texttt{5.91 GB} monitored). A deterministic $\arg\max_a U(a)$ control (\texttt{71.33\%} and \texttt{65.33\%}) confirms that minimax hazard shaping drives stealth evasion, while \texttt{7B-NF4} preserves statistical win-rate parity in three of four regimes (McNemar $p \ge 0.175$) with higher trajectory entropy ($1.749$--$1.774$ bits) and \texttt{85.76\%--89.63\%} genuine post-reflexion autonomy.
 \end{abstract}
 
 \begin{highlights}
-\item Zero-shot 7B-NF4 SLM planner beats fine-tuned 7B and GPT-4 under active monitors.
-\item Zero-hardcoding Topological Belief Graph eliminates repetitive SLM action loops.
-\item Multi-scale minimax hazard utility avoids SIEM detection without known window $W$.
-\item 1-step reflexion and prefix KV-caching cut overrides and run under 6 GB VRAM.
+\item Zero-shot 7B-NF4 SLM beats fine-tuned 7B and GPT-4 under active SIEM monitors.
+\item Domain-agnostic Topological Belief Graph eliminates repetitive SLM action loops.
+\item Multi-scale minimax hazard utility avoids alerts without known monitor window $W^*$.
+\item 1-step reflexion and prefix KV-caching cut overrides under 6 GB peak VRAM.
 \end{highlights}
 
-\begin{keyword}
+\begin{keywords}
 Small language models \sep Constrained POMDPs \sep Belief graphs \sep Network security simulation \sep Autonomous cyber agents \sep Stealth planning
-\end{keyword}
+\end{keywords}
 
-\end{frontmatter}
+\maketitle
 
 \section{Introduction}
 \label{sec:introduction}
 
-Autonomous penetration testing and red-team simulation agents provide essential stress-testing signals for cyber defense validation and adversarial resilience modeling~\cite{kott2023aica,rigaki2026building}. Recent advances in generative foundation models have catalyzed a paradigm shift from brittle scripted attack playbooks and tabular reinforcement learning (RL) policies toward language-model-driven cognitive agents capable of operating directly over structured textual network observations~\cite{deng2024pentestgpt,happe2023getting,maria2024netsecgame}. Nevertheless, deploying frontier cloud-hosted Large Language Models (LLMs) such as GPT-4 inside sensitive enterprise infrastructure introduces prohibitive data-governance risks, non-deterministic API drift, and high per-episode inference costs~\cite{rigaki2026building,subramanian2025slms}. Locally hosted Small Language Models (SLMs, $1.5\text{B}$--$7\text{B}$ parameters) resolve these privacy and reproducibility constraints, yet they exhibit severe behavioral pathologies when placed inside partially observable sequential security games.
+Autonomous offensive simulation agents provide critical adversarial validation for enterprise cyber defenses without touching production sockets~\citep{kott2023aica,rigaki2026building}. While cloud-hosted Large Language Models (LLMs) such as \texttt{GPT-4} can navigate discrete network simulations, external API reliance raises data-governance, reproducibility, and cost barriers~\citep{rigaki2026building,subramanian2025slms}. Local Small Language Models (SLMs, $1.5\text{B}$--$7\text{B}$) resolve these constraints, yet exhibit severe behavioral collapse under partial observability.
 
-In their landmark study in \textit{Expert Systems with Applications}, Rigaki, Catania, and Garc\'{i}a~\cite{rigaki2026building} demonstrated that an untuned 7-billion-parameter model (\texttt{Zephyr-7B-$\beta$}) fails almost completely in zero-shot operation on the \texttt{NetSecGame} discrete simulation benchmark~\cite{garcia2023netsecgame}, attaining only a \texttt{23.65\%} win rate without a defender and \texttt{0.62\%--3.33\%} when an active stochastic defender monitors traffic. Markov transition diagnostics revealed the underlying failure mode: local SLMs collapse into myopic action-repetition loops dominated by \texttt{FindServices} self-transitions and syntactically or semantically invalid \texttt{ExfiltrateData} invocations. To bridge this gap, Rigaki et al.~\cite{rigaki2026building} introduced \texttt{Hackphyr}, a \texttt{Zephyr-7B-$\beta$} model specialized via QLoRA/LoRA~\cite{hu2022lora,dettmers2023qlora} Supervised Fine-Tuning (SFT) on expert trajectories extracted from a single small training topology. While SFT elevated performance on unseen \texttt{Full} (\texttt{89.10\%} win rate without defender) and \texttt{Three-Networks} (\texttt{50.34\%} without defender) topologies, Rigaki et al. candidly documented three unresolved limitations in their conclusions:
-\begin{enumerate}
-    \item \textbf{Vulnerability to Active Sliding-Window Defenders:} When a sliding-window anomaly monitor was enabled, \texttt{Hackphyr}'s win rate collapsed to \texttt{44.00\%} on the \texttt{Full} scenario and \texttt{23.33\%} on \texttt{Three-Networks}, because fine-tuned breadth-first scanning habits repeatedly triggered consecutive-action and sliding-window ratio thresholds.
-    \item \textbf{Context Collapse and Short-Term Memory Deficit:} Relying on stateless prompting or short linear text windows caused even fine-tuned 7B models to lose track of previously enumerated hosts and fail in 5-to-8-hop lateral movement chains.
-    \item \textbf{Computational Footprint:} Half-precision (\texttt{FP16}) execution of a 7B model still consumed $\approx 14~\text{GB}$ of VRAM (tested on a $32~\text{GB}$ Tesla V100), motivating future research into sub-$6~\text{GB}$ quantized or ultra-compact ($\le 1.5\text{B}$) architectures without losing strategic coherence.
+In this journal, \citet{rigaki2026building} evaluated local SLMs inside \texttt{NetSecGame}~\citep{garcia2023netsecgame,maria2024netsecgame} under randomized IP layouts and goals. An untuned \texttt{Zephyr-7b-$\beta$} model attained only a \texttt{23.65\%} win rate on \texttt{Full} without a defender and \texttt{0.62\%--3.33\%} under an active stochastic defender, collapsing into \texttt{FindServices} self-loops and invalid \texttt{ExfiltrateData} calls. To overcome this, \citet{rigaki2026building} introduced \texttt{Hackphyr} via QLoRA~\citep{dettmers2023qlora,hu2022lora} Supervised Fine-Tuning (SFT) on 1,641 curated examples, elevating No-Defender win rates to \texttt{89.10\%} (\texttt{Full}) and \texttt{50.34\%} (\texttt{Three-Network}). Nevertheless, \citet{rigaki2026building} identified three open limitations:
+\begin{enumerate}[1.]
+    \item \textbf{Vulnerability to Active Sliding-Window Defenders:} Because SFT did not model defender dynamics, breadth-first scanning streaks persisted (\texttt{13+} consecutive \texttt{FindServices} actions in failure traces), dropping \texttt{Hackphyr}'s win rate to \texttt{44.00\%} on \texttt{Full} and \texttt{23.33\%} on \texttt{Three-Network}.
+    \item \textbf{Context Collapse Across Multi-Hop Chains:} Stateless or short linear action histories caused local models to lose track of previously probed hosts across \texttt{5}-to-\texttt{8}-hop lateral movement.
+    \item \textbf{Compute Footprint:} Half-precision (\texttt{FP16}) \texttt{Hackphyr} required $\approx 14~\text{GB}$ VRAM and \texttt{19.87 s} per inference on a $32~\text{GB}$ Tesla V100, motivating quantized or sub-$6~\text{GB}$ ($\le 1.5\text{B}$) alternatives.
 \end{enumerate}
 
-In this paper, we argue that the root cause of local SLM failure in discrete security games is not a lack of domain-specific SFT data, but rather an \textbf{architectural mismatch between stateless autoregressive next-token prediction and constrained graph traversal}. Asking a quantized $1.5\text{B}$ or $7\text{B}$ model to mentally reconstruct a dynamic IP graph, track exhausted \texttt{(ActionType, Parameters)} edges across 30--100 steps, and simultaneously compute multi-scale sliding-window action densities in prose exceeds its reliable working memory. Crucially, attempting to patch this weakness with hardcoded target scripts or single-action JSON prompt templates compromises scientific validity by turning the Python harness into a deterministic Finite State Machine (FSM) rather than testing genuine SLM reasoning.
+This Note argues that local SLM failure in discrete cyber games stems from an \textbf{architectural mismatch between stateless next-token prediction and constrained graph traversal}, rather than insufficient SFT data. Expecting a $1.5\text{B}$--$7\text{B}$ model to reconstruct a dynamic IP graph, track exhausted \texttt{(ActionType, Parameters)} edges over 100 steps, and mentally compute multi-horizon action densities in prose exceeds its reliable working memory. Crucially, patching this via hardcoded scripts would reduce the harness to a Finite State Machine (FSM) rather than testing SLM autonomy.
 
-To address these gaps rigorously without task-specific training data or scenario hardcoding, we introduce a \textbf{Stealth-Aware Topological Belief Graph \& Multi-Scale Minimax Hazard Planner}. Our design strictly separates structural state accounting from semantic choice: a domain-agnostic Belief Graph extracts exact, non-redundant candidate transitions from the current observation, scores each candidate via a minimax sliding-window hazard utility over multiple unseen window scales $w \in \{3, 5, 8\}$, and presents the unmasked permissible frontier to the local SLM for autonomous selection. Whenever the SLM's first generation violates state validity or repeats an exhausted edge, a 1-step counterfactual reflexion turn allows the model to self-correct before any wrapper override occurs, while balanced JSON-brace early stopping and static prefix KV-caching maintain low GPU latency.
-
-Specifically, this study makes four contributions that directly resolve the open challenges highlighted by Rigaki et al.~\cite{rigaki2026building}:
+We bridge this gap with a training-free, zero-hardcoding \textbf{Topological Belief Graph \& Multi-Scale Minimax Hazard Planner} (\texttt{ModernSLMAttacker}) that extends \citet{rigaki2026building} along four axes:
 \begin{itemize}
-    \item \textbf{Domain-Agnostic Topological Belief Graph ($\mathcal{G}_t$):} We formalize a training-free state compiler that classifies discovered subnets, hosts, services, and data items into four epistemic states (\texttt{UNEXPLORED}, \texttt{MAPPED}, \texttt{COMPROMISED}, \texttt{EXHAUSTED}), dynamically enumerating valid unexplored actions with zero hardcoded IP addresses, subnets, service strings, or scenario rules (verified via Automated AST inspection).
-    \item \textbf{Multi-Scale Minimax Hazard Utility ($U(a)$):} We formulate cyber stealth planning as a Constrained POMDP (C-POMDP)~\cite{altman1999cmdp} and derive a unified decision utility $U(a) = \alpha \cdot \text{ProgressGain}(a \mid \mathcal{G}_t) - \beta \cdot \max_{w \in \{3,5,8\}} R_w(a \mid \mathcal{H}_t)$. Evaluating worst-case normalized density, burst streaks, and \texttt{ExfiltrateData} spacing across $w \in \{3, 5, 8\}$ removes any assumption of knowing the defender's exact alert window $W$.
-    \item \textbf{Transparent 1-Step Reflexion \& Hardware-Efficient Inference:} We couple 1-step counterfactual self-correction with \texttt{FirstJsonObject\-Stopping\-Criteria} balanced-brace termination and static system-prompt prefix KV-caching, enabling consumer deployment at \texttt{3.22 GB} (\texttt{1.5B-BF16}) and \texttt{5.91--5.92 GB} (\texttt{7B-NF4}) peak VRAM while explicitly reporting \texttt{FirstPassValid \%}, \texttt{PostReflexionValid \%}, and \texttt{Override \%} rates.
-    \item \textbf{Extensive Protocol-Parity Empirical \& Statistical Validation:} Across 11,600 randomized evaluation episodes spanning all four \texttt{Full} and \texttt{Three-Networks} regimes (\texttt{Monitor Off} and \texttt{Monitor On}) including a deterministic stealth control, our zero-shot \texttt{7B-NF4} planner achieves \texttt{63.33\%} (\texttt{Full+Monitor}) and \texttt{59.33\%} (\texttt{Three-Networks+Monitor}), outperforming fine-tuned \texttt{Hackphyr-7B} (unpaired $z$-test $p \le 3.40 \times 10^{-4}$), \texttt{Baseline\_PureHeuristic} (McNemar $p \le 0.0011$), and \texttt{GPT-4} ($z$-test $p = 0.0208$ in \texttt{Three-Networks+Monitor}) alongside information-theoretic Shannon entropy evidence.
+    \item \textbf{Domain-Agnostic Topological Belief Graph ($\mathcal{G}_t$):} Compiles observations into four epistemic host states (\texttt{UNEXPLORED}, \texttt{MAPPED}, \texttt{COMPROMISED}, \texttt{EXHAUSTED}) and prunes executed edges with zero hardcoded IPs, subnets, or scenario rules (verified via AST inspection).
+    \item \textbf{Multi-Scale Minimax Hazard Utility ($U(a)$):} Formulates monitored traversal as a Constrained POMDP~\citep{altman1999cmdp} and scores candidates across window scales $w \in \{3, 5, 8\}$, eliminating breadth-first bursts without knowing the defender's window $W^*$.
+    \item \textbf{1-Step Counterfactual Reflexion \& Sub-6 GB Inference:} Pairs one-turn self-correction with \texttt{FirstJsonObjectStoppingCriteria} (\texttt{max\_new\_tokens=160}), trailing-brace repair, and static-prefix \texttt{DynamicCache} KV-caching at \texttt{3.22 GB} (\texttt{1.5B-BF16}) and \texttt{5.91--5.92 GB} (\texttt{7B-NF4}) peak VRAM while transparently reporting \texttt{FirstPass \%}, \texttt{PostReflexion \%}, and \texttt{Override \%}.
+    \item \textbf{Protocol-Parity Empirical \& Statistical Proof:} Across 11,600 randomized episodes spanning all four \texttt{Full} and \texttt{Three-Networks} regimes, zero-shot \texttt{7B-NF4} achieves \texttt{63.33\%} (\texttt{Full+Monitor}) and \texttt{59.33\%} (\texttt{Three-Networks+Monitor}), significantly outperforming fine-tuned \texttt{Hackphyr-7B} ($p \le 3.40 \times 10^{-4}$) and \texttt{GPT-4} ($p = 0.0208$ in \texttt{Three-Networks+Monitor}), while a non-LLM $\arg\max_a U(a)$ control cleanly isolates utility scaffolding from SLM reasoning.
 \end{itemize}
 
-The remainder of this manuscript is structured as follows. Section~\ref{sec:related_work} reviews discrete network simulation environments, LLM/SLM cyber agents, and stealth-constrained planning. Section~\ref{sec:formulation} formalizes the monitored \texttt{NetSecGame} environment as a C-POMDP and introduces our sliding-window Shannon action entropy metric. Section~\ref{sec:architecture} details the Topological Belief Graph, Multi-Scale Minimax Hazard Utility, 1-Step Reflexion, and low-latency GPU inference optimizations. Section~\ref{sec:setup} describes the protocol-parity evaluation setup. Section~\ref{sec:results} presents the empirical, statistical, Markovian, and information-theoretic findings. Section~\ref{sec:discussion} examines ablation mechanisms, hardware Pareto frontiers, and limitations, followed by conclusions in Section~\ref{sec:conclusion}.
-
-\section{Related Work}
+\section{Related Work and Comparative Delta}
 \label{sec:related_work}
 
-\subsection{Reinforcement Learning and Discrete Network Simulation Testbeds}
-Evaluating sequential cyber decision-making ethically requires deterministic, reproducible simulation testbeds that mirror enterprise lateral-movement topologies without touching live network sockets. Early platforms such as Microsoft's \texttt{CyberBattleSim}~\cite{microsoft2021cyberbattlesim} modeled credential-graph traversal via Gym interfaces for tabular Q-learning~\cite{watkins1992qlearning} and deep RL agents, while \texttt{CybORG}~\cite{standenc2021cyborg} introduced multi-agent blue-versus-red cyber operations exercises. \texttt{NetSecGame}~\cite{garcia2023netsecgame,maria2024netsecgame}, developed by the Stratosphere Laboratory on top of the CYST discrete-event engine, advances this lineage by providing multi-subnet topologies (client, server, DMZ, and C\&C router boundaries), arbitrary per-episode IP/subnet/objective randomization (\texttt{use\_dynamic\_addresses}), MITRE ATT\&CK-aligned abstract actions (\texttt{ScanNetwork}, \texttt{FindServices}, \texttt{ExploitService}, \texttt{FindData}, \texttt{ExfiltrateData}), and an active \texttt{GlobalDefender} anomaly monitor.
+Discrete security testbeds such as \texttt{CyberBattleSim}~\citep{microsoft2021cyberbattlesim}, \texttt{CybORG}~\citep{standenc2021cyborg}, and \texttt{NetSecGame}~\citep{garcia2023netsecgame,maria2024netsecgame} benchmark sequential attack planning without real-world harm. As shown by \citet{rigaki2026building}, tabular Q-learning~\citep{watkins1992qlearning} trained for 50,000 episodes attains \texttt{67.71\%} (NoDef) and \texttt{71.57\%} (Monitor On) on \texttt{Full} only under fixed IP addresses, collapsing to \texttt{0.00\%} on \texttt{Three-Network} where topology and multi-subnet pivoting exceed fixed Q-tables.
 
-As documented by Rigaki et al.~\cite{rigaki2026building}, tabular Q-learning~\cite{watkins1992qlearning} trained for 50,000 episodes achieves respectable win rates (\texttt{67.71\%} without defender; \texttt{71.57\%} with defender) only when network IPs remain fixed across episodes. The moment IP addresses and goal targets vary dynamically across unseen multi-subnet topologies (\texttt{Three-Networks}), tabular RL collapses completely (\texttt{0.00\%} win rate), establishing the necessity of representationally invariant planners capable of reasoning over symbolic state graphs rather than memorized IP-indexed tables.
-
-\subsection{LLM and SLM Autonomous Cyber Agents}
-Applying pretrained foundation models to penetration testing gained momentum through \texttt{PentestGPT}~\cite{deng2024pentestgpt}, \texttt{AutoAttacker}~\cite{xu2024autoattacker}, and interactive shell studies~\cite{happe2023getting}, which structured high-level attack plans using \texttt{ReAct}-style thought-action loops~\cite{yao2023react} within cognitive architectures such as \texttt{CoALA}~\cite{sumers2024coala}. While frontier cloud models like GPT-4 achieve strong zero-shot completion on stateless topologies~\cite{maria2024netsecgame}, local \texttt{7B} models exhibit severe syntax errors, parameter hallucinations, and action repetition~\cite{rigaki2026building,subramanian2025slms}.
-
-To make \texttt{7B} models viable locally, \texttt{Hackphyr}~\cite{rigaki2026building} applied LoRA~\cite{hu2022lora} and \texttt{QLoRA}~\cite{dettmers2023qlora} SFT to \texttt{Zephyr-7B-$\beta$}~\cite{tunstall2023zephyr} using a curated corpus of GPT-4 demonstrations. Although fine-tuning boosted valid-action syntax dramatically, behavioral graph analysis revealed persistent structural flaws: \texttt{Hackphyr} still converged on long consecutive \texttt{FindServices} bursts (\texttt{13+} steps in failure cases) and suffered steep generalization drops (\texttt{89.10\%} $\rightarrow$ \texttt{50.34\%} without defender; \texttt{44.00\%} $\rightarrow$ \texttt{23.33\%} with defender) when moving to multi-hop \texttt{Three-Networks} scenarios. Parallel research on verbal self-correction, notably \texttt{Reflexion}~\cite{shinn2023reflexion}, demonstrated that feeding structured failure diagnostics back to an agent improves single-step compliance without weight updates. However, naive verbal reflection alone cannot prevent cross-step combinatorial repetition or sliding-window monitor detection unless grounded in an explicit topological belief state and hazard model.
-
-\subsection{Stealth-Constrained Planning and Sliding-Window Anomaly Detection}
-Operational security monitors rarely detect isolated single actions; instead, SIEM rule engines and \texttt{GlobalDefender} aggregate temporal features over sliding action windows of length $W$~\cite{rigaki2026building}. Specifically, threshold monitors track both the sliding-window density ratio $\text{count}_W(a) / W$ for high-noise action categories (\texttt{ScanNetwork}, \texttt{FindServices}, \texttt{ExploitService}, \texttt{FindData}, \texttt{ExfiltrateData}) and consecutive same-type burst lengths. Prior LLM agents (\texttt{GPT-4}, \texttt{GPT-3.5}, \texttt{Hackphyr}) operate without stealth-aware temporal constraints~\cite{rigaki2026building}, naturally defaulting to breadth-first enumeration (scanning all subnets first, then probing services on all discovered hosts consecutively). In a sliding-window monitor regime, breadth-first homogeneity concentrates identical enum types inside $[t-W+1, t]$, driving rapid detection spikes. Formal Constrained POMDPs (C-POMDPs)~\cite{altman1999cmdp,kaelbling1998pomdp} solve sequential objectives subject to cumulative or windowed hazard budgets, motivating our minimax multi-scale utility formulation that diversifies trajectories interleaving reconnaissance, exploitation, and exfiltration across kill-chain phases without knowing the monitor's exact $W$.
+LLM penetration-testing frameworks including \texttt{PentestGPT}~\citep{deng2024pentestgpt}, \texttt{AutoAttacker}~\citep{xu2024autoattacker}, and shell-level agents~\citep{happe2023getting} adopt \texttt{ReAct}~\citep{yao2023react} and \texttt{CoALA}~\citep{sumers2024coala} loops. \citet{rigaki2026building} formalized \texttt{ReAct+} with a $k$-step action memory and QLoRA SFT, demonstrating that \texttt{Hackphyr} approaches \texttt{GPT-4} without monitors yet retains \texttt{FindServices} loops and lacks stealth awareness. Conversely, \citet{shinn2023reflexion} showed verbal \texttt{Reflexion} improves single-step validity, but without an explicit belief graph and C-POMDP hazard model~\citep{altman1999cmdp,kaelbling1998pomdp}, small models cannot regulate temporal action density over an unknown SIEM window $W^*$. Our architecture resolves both deficits zero-shot.
 
 \section{Problem Formulation}
 \label{sec:formulation}
 
 \subsection{Monitored Network Traversal as a Constrained POMDP}
-We model an episode of \texttt{NetSecGame} with an active threshold monitor as a finite-horizon Constrained Partially Observable Markov Decision Process (C-POMDP)~\cite{altman1999cmdp,kaelbling1998pomdp} defined by the tuple:
-\begin{equation}
-    \mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{R}, \Omega, \mathcal{O}, \mathcal{C}, \gamma),
-\end{equation}
-where:
+We model an episode of \texttt{NetSecGame} with an active threshold monitor as a finite-horizon Constrained POMDP~\citep{altman1999cmdp,kaelbling1998pomdp}, $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{R}, \Omega, \mathcal{O}, \mathcal{C}, \gamma)$:
 \begin{itemize}
-    \item $\mathcal{S}$ is the latent network state comprising true subnet topologies, dynamic IP assignments, host vulnerabilities, running services, resident data objects, and hidden monitor alert counters;
-    \item $\mathcal{A} = \mathcal{A}_{\text{type}} \times \Theta$ is the parameter-grounding action space over canonical MITRE ATT\&CK-aligned action types $\mathcal{A}_{\text{type}} = \{$\texttt{ScanNetwork}, \texttt{FindServices}, \texttt{ExploitService}, \texttt{FindData}, \texttt{ExfiltrateData}$\}$~\cite{mitre2024attack} and entity parameters $\theta \in \Theta$ (\texttt{source\_host}, \texttt{target\_network}, \texttt{target\_host}, \texttt{target\_service}, \texttt{data});
-    \item $\mathcal{T}(s' \mid s, a)$ governs state transitions in the CYST network model;
-    \item $\Omega$ is the partial observation space returned to the attacker at step $t$: $o_t = (\mathcal{K}^{\text{net}}_t, \mathcal{K}^{\text{host}}_t, \mathcal{K}^{\text{ctrl}}_t, \mathcal{K}^{\text{srv}}_t, \mathcal{K}^{\text{data}}_t, \mathcal{K}^{\text{blk}}_t, g)$, representing known subnets, discovered hosts, controlled footholds, discovered services, located data items, known blocks, and the natural-language goal $g$;
-    \item $\mathcal{R}(s_t, a_t) \in \{-1, +100, -10\}$ assigns $-1$ per step, $+100$ upon terminal goal satisfaction (\texttt{ExfiltrateData} delivering goal data to the target IP), and $-10$ upon defender detection within horizon $T_{\max} = 100$;
-    \item $\mathcal{C}(h_t, a_t) \in \{0, 1\}$ models the hidden SIEM threshold constraint induced by the defender over recent action-type history $h_t = (a_1, \dots, a_{t-1})$ with an unknown monitor window $W^*$.
+    \item $\mathcal{S}$ is the latent network state (subnet connectivity, dynamic IP assignments, services, data objects, and hidden monitor alert counters);
+    \item $\mathcal{A} = \mathcal{A}_{\text{type}} \times \Theta$ spans the five MITRE ATT\&CK-aligned action types $\mathcal{A}_{\text{type}} = \{$\texttt{ScanNetwork}, \texttt{FindServices}, \texttt{ExploitService}, \texttt{FindData}, \texttt{ExfiltrateData}$\}$~\citep{mitre2024attack} and entity parameters $\theta \in \Theta$;
+    \item $\mathcal{T}(s' \mid s, a)$ is the CYST transition kernel;
+    \item $\Omega$ yields partial observations $o_t = (\mathcal{K}^{\text{net}}_t, \mathcal{K}^{\text{host}}_t, \mathcal{K}^{\text{ctrl}}_t, \mathcal{K}^{\text{srv}}_t, \mathcal{K}^{\text{data}}_t, \mathcal{K}^{\text{blk}}_t, g)$ covering known subnets, hosts, controlled footholds, services, data, blocks, and goal $g$;
+    \item $\mathcal{R}(s_t, a_t) \in \{-1, +100, -10\}$ assigns $-1$ per step, $+100$ upon goal exfiltration, and $-10$ upon detection or timeout within $T_{\max} = 100$ (for direct comparison with \citet{rigaki2026building}, Section~\ref{sec:results} also reports ESWA-50 parity returns with $-50$ detection and $0$ extra timeout penalty);
+    \item $\mathcal{C}(h_t, a_t) \in \{0, 1\}$ encodes the hidden defender trigger over action history $h_t = (a_1, \dots, a_{t-1})$ with unknown window $W^*$.
 \end{itemize}
 
-Specifically, an active threshold defender triggers a stochastic detection check (or block) whenever an action $a_t$ causes either: (i) the empirical frequency within the hidden window $W^*$ to exceed type-specific density thresholds $\tau_{\text{ratio}}(a_t)$, i.e.,
-\begin{equation}
-    \frac{1}{W^*} \sum_{k=\max(1, t-W^*+1)}^{t} \mathbb{I}[\text{type}(a_k) = \text{type}(a_t)] \ge \tau_{\text{ratio}}(\text{type}(a_t)),
-\end{equation}
-or (ii) the trailing consecutive burst length of identical action types reaches a burst limit $\tau_{\text{consec}}(\text{type}(a_t))$. Notice that any planner operating strictly from $(o_1, \dots, o_t)$ neither observes $W^*$ nor observes internal defender alert probabilities directly; it must instead regulate its own emitted sequence $\mathcal{H}_t = (\text{type}(a_1), \dots, \text{type}(a_{t-1}))$ so as to maximize goal completion probability $\mathbb{P}(\text{Win} \mid T \le T_{\max})$ while keeping $\mathbb{P}(\text{Detect})$ minimal.
+Specifically, \texttt{GlobalDefender} triggers a stochastic detection check whenever $a_t$ drives the windowed density inside $W^*$ to a type-specific threshold $\tau_{\text{ratio}}(\text{type}(a_t))$:
+\begin{multline}
+    \frac{1}{W^*} \sum_{k=\max(1, t-W^*+1)}^{t} \mathbb{I}[\mathrm{type}(a_k) = \mathrm{type}(a_t)] \\
+    \ge \tau_{\mathrm{ratio}}(\mathrm{type}(a_t)),
+    \label{eq:defender_density}
+\end{multline}
+or reaches a trailing consecutive burst limit $\tau_{\text{consec}}(\text{type}(a_t))$ (e.g., consecutive \texttt{ScanNetwork}/\texttt{FindServices}) or episodic repeat limit~\citep{rigaki2026building}. Operating solely on $(o_1, \dots, o_t)$ without observing $W^*$, the planner must regulate $\mathcal{H}_t = (\text{type}(a_1), \dots, \text{type}(a_{t-1}))$ to maximize $\mathbb{P}(\text{Win} \mid T \le T_{\max})$ while suppressing detection spikes.
 
-\subsection{Information-Theoretic Action Diversity via Shannon Entropy}
-A key mathematical explanation for why breadth-first heuristics and unguided SLMs fail against sliding-window monitors emerges from inspecting the local empirical distribution of action types over an active window $w$. Let $\hat{p}_{t,c} = \frac{1}{w} \sum_{k=\max(1,t-w+1)}^{t} \mathbb{I}[\text{type}(a_k) = c]$ denote the empirical relative frequency of action type $c \in \mathcal{A}_{\text{type}}$ in the sliding window ending at step $t$. The \textbf{Sliding-Window Shannon Action Entropy}~\cite{shannon1948mathematical} in bits is defined as:
+\subsection{Sliding-Window Shannon Action Entropy}
+To quantify behavioral dispersion, let $\hat{p}_{t,c} = \frac{1}{w} \sum_{k=\max(1,t-w+1)}^{t} \mathbb{I}[\text{type}(a_k) = c]$ be the empirical frequency of $c \in \mathcal{A}_{\text{type}}$ in window $w$. The \textbf{Sliding-Window Shannon Action Entropy}~\citep{shannon1948mathematical} in bits is:
 \begin{equation}
     H_t = -\sum_{c \in \mathcal{A}_{\text{type}}:\, \hat{p}_{t,c} > 0} \hat{p}_{t,c} \log_2 \hat{p}_{t,c}.
     \label{eq:shannon_entropy}
 \end{equation}
-Under an action repetition collapse (e.g., repeatedly issuing \texttt{ScanNetwork} or \texttt{FindServices}), $\hat{p}_{t,c} \to 1.0$ for a single category, yielding $H_t \to 0$ bits and simultaneously saturating $\tau_{\text{ratio}}(c)$ and $\tau_{\text{consec}}(c)$. Conversely, a depth-first interleaved policy that pivots smoothly across subnets, service discovery, exploitation, data discovery, and spaced exfiltration maintains higher local dispersion ($H_t \in [1.5, 2.0]$ bits), lowering peak category concentration across every candidate window scale without artificially stalling mission progress.
+Repetition collapse drives $\hat{p}_{t,c} \to 1.0$ ($H_t \to 0$ bits), saturating Eq.~\eqref{eq:defender_density} and $\tau_{\text{consec}}$. Interleaving reconnaissance, exploitation, collection, and spaced exfiltration sustains $H_t \in [1.5, 2.0]$ bits, dispersing windowed counts across every candidate horizon.
 
-\section{Proposed Cognitive \& Stealth Architecture}
+\section{Neuro-Symbolic Stealth Planning Architecture}
 \label{sec:architecture}
 
-Our planner architecture (\texttt{ModernSLMAttacker}) decouples exact topological state bookkeeping from semantic contextual reasoning while preserving full SLM autonomy over permissible action selection. As illustrated in Figure~\ref{fig:arch}, the wrapper integrates four zero-hardcoding modules: (A) the Topological Belief Graph $\mathcal{G}_t$, (B) the Multi-Scale Minimax Hazard Utility $U(a)$, (C) the Low-Latency Local SLM Engine, and (D) 1-Step Counterfactual Reflexion with deadlock-safe fallback. Zero environment-specific strings (IPs, CIDR subnets, service banners, or scenario names) appear anywhere in the codebase.
+Figure~\ref{fig:arch} overviews \texttt{ModernSLMAttacker}, which decouples exact graph accounting from semantic choice across four domain-agnostic modules containing zero hardcoded IPs, subnets, services, or scenario names.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig1_system_architecture.pdf}
+    \includegraphics[width=0.90\textwidth]{figures/fig1_system_architecture.pdf}
     \caption{End-to-end cognitive and stealth planning pipeline combining the Topological Belief Graph ($\mathcal{G}_t$), Multi-Scale Minimax Utility ($U(a)$), KV-prefix cached local SLM inference with balanced JSON-brace early stopping, and 1-Step Counterfactual Reflexion.}
     \label{fig:arch}
 \end{figure*}
 
 \subsection{Domain-Agnostic Topological Belief Graph}
-Because NetSecGame randomizes IP addresses, host counts, and goal targets at every episode reset, raw prose observations force small context-window SLMs to repeatedly re-parse unstructured IP lists. Instead, \texttt{SemanticMemoryStore} incrementally maintains a \textbf{Topological Belief Graph} $\mathcal{G}_t = (\mathcal{V}_t, \mathcal{E}_t)$ strictly from observed \texttt{(o\_t, a\_{t-1}, r\_t)} transitions:
+Because per-episode IP randomization defeats raw text memory, \texttt{SemanticMemoryStore} incrementally compiles observation transitions into a \textbf{Topological Belief Graph} $\mathcal{G}_t = (\mathcal{V}_t, \mathcal{E}_t)$ (Algorithm~\ref{alg:belief_graph}):
 \begin{itemize}
-    \item \textbf{Nodes ($\mathcal{V}_t$):} Subnets ($N \in \mathcal{K}^{\text{net}}_t$) and hosts ($h \in \mathcal{K}^{\text{host}}_t \cup \mathcal{K}^{\text{ctrl}}_t$), tagged dynamically with discovered remote services $\mathcal{S}_t(h)$, data tuples $\mathcal{D}_t(h) = \{(\text{owner}, \text{id})\}$, and parsed goal destination IP $h_{\text{goal}}$ extracted via regex from $g$.
-    \item \textbf{Epistemic Host Classification:} Every host node $h$ is deterministically mapped to one of four domain-agnostic epistemic states:
-    \begin{enumerate}
-        \item \texttt{COMPROMISED}: $h \in \mathcal{K}^{\text{ctrl}}_t$ (available as an active pivot \texttt{source\_host}; controlled hosts remain \texttt{COMPROMISED} and receive the \texttt{data\_\allowbreak{}searched} detail flag once local search/exfiltration completes);
-        \item \texttt{MAPPED}: remote services discovered on $h$ ($\mathcal{S}_t(h) \neq \emptyset$) and $h \notin \mathcal{K}^{\text{ctrl}}_t$;
-        \item \texttt{EXHAUSTED}: $h \notin \mathcal{K}^{\text{ctrl}}_t$ was probed for services with zero remaining unfailed exploitable services (\texttt{all\_services\_exhausted});
-        \item \texttt{UNEXPLORED}: $h \in \mathcal{K}^{\text{host}}_t \setminus \mathcal{K}^{\text{ctrl}}_t$ not yet probed (\texttt{h not in probed\_service\_hosts}).
-    \end{enumerate}
-    \item \textbf{Directed Exhausted Edge Pruning ($\mathcal{E}_t$):} Every executed tuple $(\text{type}(a), \text{canonical}(a.\text{params}))$ is recorded in \texttt{executed\_actions} (normalization strips syntax casing and orders dictionary keys uniformly). All syntactically legal \texttt{(ActionType, Parameters)} tuples permitted by NetSecGame state transition semantics are enumerated and filtered by set difference against \texttt{executed\_actions}, removing exact wasted retries while retaining alternative routes or newly unlocked targets.
+    \item \textbf{Epistemic Host Classification:} Each host $h \in \mathcal{K}^{\text{host}}_t \cup \mathcal{K}^{\text{ctrl}}_t$ is mapped deterministically to one of four states (Figure~\ref{fig:mechanism}(a)): (1) \texttt{COMPROMISED} ($h \in \mathcal{K}^{\text{ctrl}}_t$, flagged \texttt{data\_searched} once local collection/exfiltration finishes); (2) \texttt{MAPPED} ($\mathcal{S}_t(h) \neq \emptyset$ and $h \notin \mathcal{K}^{\text{ctrl}}_t$); (3) \texttt{EXHAUSTED} ($h \notin \mathcal{K}^{\text{ctrl}}_t$ probed with zero unfailed services remaining); and (4) \texttt{UNEXPLORED} ($h \in \mathcal{K}^{\text{host}}_t \setminus \mathcal{K}^{\text{ctrl}}_t$ not yet service-probed).
+    \item \textbf{Exhausted Edge Pruning:} Every executed tuple $(\text{type}(a), \text{canon}(\theta))$ is stored in $\mathcal{E}_{\text{exec}}$. Legal \texttt{NetSecGame} transitions $\mathcal{C}_{\text{raw}}$ are filtered by $\mathcal{C}_{\text{raw}} \setminus \mathcal{E}_{\text{exec}}$ to form the unmasked valid frontier $\mathcal{A}^{\text{valid}}_t$ exposed to the SLM.
 \end{itemize}
-
-Algorithm~\ref{alg:belief_graph} summarizes belief compilation and candidate frontier construction, while Figure~\ref{fig:mechanism}(a) depicts the epistemic host lifecycle transitions across kill-chain actions. Importantly, unlike FSM wrappers that select one hardcoded next action, \texttt{get\_valid\_action\_space} exposes the full pruned valid frontier $\mathcal{A}^{\text{valid}}_t$ inside the structured prompt so the SLM chooses freely among valid non-redundant operations.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig2_belief_and_hazard_mechanism.pdf}
+    \includegraphics[width=0.90\textwidth]{figures/fig2_belief_and_hazard_mechanism.pdf}
     \caption{(a) Epistemic host lifecycle state machine inside the Topological Belief Graph $\mathcal{G}_t$, and (b) Multi-Scale Minimax Hazard Utility $U(a)$ decomposition across $w \in \{3, 5, 8\}$ showing burst suppression on \texttt{FindServices}/\texttt{ScanNetwork} versus positive interleaved progression.}
     \label{fig:mechanism}
 \end{figure*}
@@ -159,130 +136,108 @@ Algorithm~\ref{alg:belief_graph} summarizes belief compilation and candidate fro
 \caption{Topological Belief Graph Update \& Frontier Enumeration}
 \label{alg:belief_graph}
 \begin{algorithmic}[1]
-\Require Observation $o_t$, previous executed tuple $(a_{t-1}, \theta_{t-1})$, goal text $g$, semantic store $\mathcal{G}_{t-1}$
-\Ensure Updated belief graph $\mathcal{G}_t$, epistemic tags, pruned valid frontier $\mathcal{A}^{\text{valid}}_t$
+\Require Observation $o_t$, prior $(a_{t-1}, \theta_{t-1})$, goal $g$, store $\mathcal{G}_{t-1}$
+\Ensure Updated $\mathcal{G}_t$, epistemic tags, valid frontier $\mathcal{A}^{\text{valid}}_t$
 \If{$t > 1$}
-    \State Record normalized signature $(\text{type}(a_{t-1}), \text{canon}(\theta_{t-1}))$ in $\mathcal{E}_{\text{exec}}$
-    \State Update probed sets (\texttt{probed\_service\_hosts}, \texttt{searched\_data\_hosts}, \texttt{scanned\_networks})
+    \State Record $(\text{type}(a_{t-1}), \text{canon}(\theta_{t-1}))$ in $\mathcal{E}_{\text{exec}}$
+    \State Update \texttt{probed\_service\_hosts}, \texttt{searched\_data\_hosts}, \texttt{scanned\_networks}
 \EndIf
 \State Parse goal IP $h_{\text{goal}}$ from $g$; normalize $\mathcal{K}^{\text{net}}_t, \mathcal{K}^{\text{ctrl}}_t, \mathcal{K}^{\text{host}}_t, \mathcal{S}_t, \mathcal{D}_t, \mathcal{K}^{\text{blk}}_t$
 \For{each host $h \in \mathcal{K}^{\text{host}}_t \cup \mathcal{K}^{\text{ctrl}}_t$}
-    \State Assign epistemic label $\in \{$\texttt{COMPROMISED}, \texttt{MAPPED}, \texttt{EXHAUSTED}, \texttt{UNEXPLORED}$\}$
+    \State Assign label $\in \{$\texttt{COMPROMISED}, \texttt{MAPPED}, \texttt{EXHAUSTED}, \texttt{UNEXPLORED}$\}$
 \EndFor
-\State Enumerate legal \texttt{NetSecGame} transitions $\mathcal{C}_{\text{raw}}$:
-\State \quad \texttt{ExfiltrateData} for $(s \in \mathcal{K}^{\text{ctrl}}_t,\, d \in \mathcal{D}_t(s),\, h_{\text{dst}} \in \mathcal{K}^{\text{ctrl}}_t)$ prioritizing $h_{\text{dst}} = h_{\text{goal}}$
-\State \quad \texttt{FindData} for $h \in \mathcal{K}^{\text{ctrl}}_t$; \texttt{ExploitService} for $(s \in \mathcal{K}^{\text{ctrl}}_t,\, h \notin \mathcal{K}^{\text{ctrl}}_t,\, \text{srv} \in \mathcal{S}_t(h))$
-\State \quad \texttt{FindServices} and \texttt{ScanNetwork} avoiding known blocks $\mathcal{K}^{\text{blk}}_t$
-\State $\mathcal{A}^{\text{valid}}_t \leftarrow \{c \in \mathcal{C}_{\text{raw}} \mid \text{sig}(c) \notin \mathcal{E}_{\text{exec}}\}$ \Comment{Fallback to $\mathcal{C}_{\text{raw}}$ only if $\mathcal{A}^{\text{valid}}_t = \emptyset$}
+\State Enumerate legal transitions $\mathcal{C}_{\text{raw}}$ avoiding $\mathcal{K}^{\text{blk}}_t$ (prioritizing $h_{\text{dst}} = h_{\text{goal}}$ for \texttt{ExfiltrateData})
+\State $\mathcal{A}^{\text{valid}}_t \leftarrow \{c \in \mathcal{C}_{\text{raw}} \mid \text{sig}(c) \notin \mathcal{E}_{\text{exec}}\}$ \Comment{Fallback $\mathcal{C}_{\text{raw}}$ if $\emptyset$}
 \State \Return $\mathcal{G}_t, \mathcal{A}^{\text{valid}}_t$
 \end{algorithmic}
 \end{algorithm}
 
 \subsection{Multi-Scale Minimax Hazard Utility Function}
-A critical methodological risk in stealth planning is overfitting heuristic rules to a simulator's known defender window length $W^*$ (for example, $W^* = 5$ in standard \texttt{GlobalDefender} YAML profiles). To eliminate any dependence on knowing $W^*$, we evaluate every candidate action $a \in \mathcal{A}^{\text{valid}}_t$ using a decision-theoretic \textbf{Multi-Scale Minimax Hazard Utility} across three distinct temporal scales $w \in \mathcal{W} = \{3, 5, 8\}$:
+To avoid overfitting to a known simulator window (e.g., $W^*=5$), each candidate $a \in \mathcal{A}^{\text{valid}}_t$ is scored by a \textbf{Multi-Scale Minimax Hazard Utility} over $\mathcal{W} = \{3, 5, 8\}$:
 \begin{equation}
     U(a) = \alpha \cdot \mathrm{ProgressGain}(a \mid \mathcal{G}_t) - \beta \cdot \max_{w \in \{3, 5, 8\}} R_w(a \mid \mathcal{H}_t),
     \label{eq:minimax_utility}
 \end{equation}
 with $\alpha = 1.0$ and $\beta = 1.2$.
 
-\paragraph{Depth-First Topological Progress Gain ($\mathrm{ProgressGain}$)}
-Unlike breadth-first scanners that exhaust all \texttt{ScanNetwork} and \texttt{FindServices} operations before attempting exploitation, depth-first kill-chain progression completes compromise-to-exfiltration loops along newly discovered footholds immediately, naturally alternating action types across steps. We assign normalized progress gains $g_0(c) \in \{1.00,\, 0.80,\, 0.62,\, 0.42,\, 0.22\}$ for $\{$\texttt{ExfiltrateData}, \texttt{FindData}, \texttt{ExploitService}, \texttt{FindServices}, \texttt{ScanNetwork}$\}$ respectively, augmented by two lightweight graph bonuses: $+0.08$ when \texttt{ExfiltrateData} targets $h_{\text{goal}}$, and $+0.06$ when \texttt{FindServices} targets an unprobed, non-compromised host (\texttt{-1.0} penalty if $\mathrm{sig}(a) \in \mathcal{E}_{\text{exec}}$).
+\paragraph{Depth-First Progress Gain ($\mathrm{ProgressGain}$)}
+Base gains $g_0(c) \in \{1.00,\, 0.80,\, 0.62,\, 0.42,\, 0.22\}$ for $\{$\texttt{ExfiltrateData}, \texttt{FindData}, \texttt{ExploitService}, \texttt{FindServices}, \texttt{ScanNetwork}$\}$ prioritize closing active footholds before expanding breadth-first scans, augmented by $+0.08$ for \texttt{ExfiltrateData} targeting $h_{\text{goal}}$ and $+0.06$ for \texttt{FindServices} on unprobed non-compromised hosts ($-1.0$ if $\mathrm{sig}(a) \in \mathcal{E}_{\text{exec}}$).
 
 \paragraph{Minimax Multi-Scale Hazard ($\max_{w \in \{3,5,8\}} R_w$)}
-Given recent execution-type history $\mathcal{H}_t$, for each horizon scale $w \in \{3, 5, 8\}$, let $\mathcal{H}_{t,w}^{+}(a) = (\mathcal{H}_t[-(w-1):]) \mathbin{\Vert} [\mathrm{type}(a)]$ denote the projected sliding window. We compute:
-\begin{enumerate}
-    \item \textit{Windowed density:} $\rho_w(a) = \frac{1}{w}\,\mathrm{count}(\mathrm{type}(a),\, \mathcal{H}_{t,w}^{+}(a))$;
-    \item \textit{Consecutive burst hazard:} letting $\sigma_w(a)$ be the trailing consecutive run length of $\mathrm{type}(a)$ in $\mathcal{H}_{t,w}^{+}(a)$, $\mathcal{A}_{\mathrm{burst}} = \{$\texttt{ScanNetwork}, \texttt{FindData}, \texttt{ExfiltrateData}$\}$, and $\mathcal{A}_{\mathrm{med}} = \{$\texttt{FindServices}, \texttt{ExploitService}$\}$,
-    \begin{equation}
-        B_w(a) = \begin{cases}
-            1.0, & \text{if } \sigma_w(a) \ge 3 \text{ or } (\sigma_w(a) \ge 2 \land \mathrm{type}(a) \in \mathcal{A}_{\mathrm{burst}}), \\
-            0.55, & \text{if } \sigma_w(a) \ge 2 \text{ and } \mathrm{type}(a) \in \mathcal{A}_{\mathrm{med}}, \\
-            0.0, & \text{otherwise};
-        \end{cases}
-    \end{equation}
-    \item \textit{Exfiltration spacing guard:} prior diagnostic traces revealed that clustering two \texttt{ExfiltrateData} attempts inside a monitor window frequently trips strict exfiltration-rate detectors; hence $E_w(a) = 1.0$ if $\mathrm{type}(a) = \mathrm{ExfiltrateData}$ and $\mathrm{count}(\mathrm{ExfiltrateData},\, \mathcal{H}_t[-w:]) \ge 1$, and $0.0$ otherwise.
-\end{enumerate}
-The scale-$w$ hazard is $R_w(a \mid \mathcal{H}_t) = \min\big(1.0,\, \max(\rho_w(a), B_w(a), E_w(a))\big)$, and redundancy adds $+0.35$ bounded to $[0, 1]$. Taking the supremum over $\mathcal{W} = \{3, 5, 8\}$ provides a low-overhead Fibonacci/logarithmic-spacing discretization of the continuous tactical window supremum $\max_{w \in [2, 8]} H_w(a)$ across burst ($w=3$), tactical ($w=5$), and horizon ($w=8$) timescales without any knowledge of the monitor's hidden window $W^*$, guaranteeing $O(|\mathcal{W}| \cdot |\mathcal{A}^{\text{valid}}_t|)$ step complexity while upper-bounding intermediate window densities. As visualized in Figure~\ref{fig:mechanism}(b), $U(a)$ resolves both breadth-first enumeration traps and exfiltration clustering uniformly: for interleaved actions with baseline $w=3$ density $1/3$ (yielding a $-\beta R_w = -1.2 \times (1/3) = -0.40$ minimax hazard penalty), \texttt{ExploitService} achieves $U = 0.62 - 0.40 = +0.22$, \texttt{FindData} achieves $U = 0.80 - 0.40 = +0.40$, and spaced \texttt{ExfiltrateData} targeting $h_{\text{goal}}$ achieves $U = 1.08 - 0.40 = +0.68$. By contrast, repeating \texttt{FindServices} across $w=5$ ($\rho_5 = 3/5 = 0.60$, penalty $-0.72$, even with the $+0.06$ unprobed bonus) drives $U(\mathrm{FindServices}) = 0.48 - 0.72 = -0.24$, and repeating \texttt{ScanNetwork} inside $w=3$ ($\rho_3 = 2/3$, penalty $-0.80$) yields $U(\mathrm{ScanNetwork}) = 0.22 - 0.80 = -0.58$, deterministically prioritizing interleaved kill-chain progression.
+For each scale $w \in \{3, 5, 8\}$, let $\mathcal{H}_{t,w}^{+}(a) = (\mathcal{H}_t[-(w-1):]) \mathbin{\Vert} [\mathrm{type}(a)]$. We compute windowed density $\rho_w(a) = \frac{1}{w}\,\mathrm{count}(\mathrm{type}(a),\, \mathcal{H}_{t,w}^{+}(a))$, trailing consecutive burst hazard $B_w(a)$ (with run length $\sigma_w(a)$, $\mathcal{A}_{\mathrm{burst}} = \{$\texttt{ScanNetwork}, \texttt{FindData}, \texttt{ExfiltrateData}$\}$, $\mathcal{A}_{\mathrm{med}} = \{$\texttt{FindServices}, \texttt{ExploitService}$\}$):
+\begin{equation}
+    B_w(a) = \begin{cases}
+        1.0, & \sigma_w(a) \ge 3 \text{ or} \\
+             & \big(\sigma_w(a) \ge 2 \land \mathrm{type}(a) \in \mathcal{A}_{\mathrm{burst}}\big), \\
+        0.55, & \sigma_w(a) \ge 2 \text{ and } \mathrm{type}(a) \in \mathcal{A}_{\mathrm{med}}, \\
+        0.0, & \text{otherwise},
+    \end{cases}
+    \label{eq:burst_hazard}
+\end{equation}
+and an exfiltration spacing guard $E_w(a) = 1.0$ if $\mathrm{type}(a) = \mathrm{ExfiltrateData}$ and $\mathrm{count}(\mathrm{ExfiltrateData},\, \mathcal{H}_t[-w:]) \ge 1$ ($0.0$ otherwise). The scale-$w$ hazard is $R_w(a \mid \mathcal{H}_t) = \min\big(1.0,\, \max(\rho_w(a), B_w(a), E_w(a))\big)$, plus $+0.35$ for redundant edges clamped to $[0, 1]$.
 
-When \texttt{enable\_stealth\_pacing=True}, soft masking defers actions violating streak-breaking constraints (if non-reconnaissance depth actions exist after \texttt{FindServices}/\texttt{ScanNetwork}) or exceeding threshold risk whenever at least one lower-hazard candidate exists in $\mathcal{A}^{\text{valid}}_t$ (deadlock-safe bypass if all valid actions carry high hazard), and sorts the prompt's permissible candidate list by descending $U(a)$.
+Taking the supremum over $\mathcal{W} = \{3, 5, 8\}$ yields a low-overhead Fibonacci/logarithmic-spacing discretization of the continuous tactical window supremum $\max_{w \in [2, 8]} H_w(a)$ across burst ($w=3$), tactical ($w=5$), and horizon ($w=8$) timescales without assuming $W^*$, guaranteeing $O(|\mathcal{W}| \cdot |\mathcal{A}^{\text{valid}}_t|)$ step complexity while upper-bounding intermediate window densities. As shown in Figure~\ref{fig:mechanism}(b), with baseline $w=3$ density $1/3$ ($-\beta R_w = -0.40$), \texttt{ExploitService} scores $+0.22$, \texttt{FindData} $+0.40$, and spaced goal \texttt{ExfiltrateData} $+0.68$; conversely, repeating \texttt{FindServices} over $w=5$ ($\rho_5 = 0.60$, penalty $-0.72$) drops to $-0.24$, and repeating \texttt{ScanNetwork} inside $w=3$ ($\rho_3 = 2/3$, penalty $-0.80$) drops to $-0.58$. When \texttt{enable\_stealth\_pacing=True}, soft masking defers streak-violating or high-hazard actions whenever a lower-hazard valid option exists (deadlock-safe bypass otherwise) and ranks the prompt's permissible frontier by descending $U(a)$.
 
 \subsection{1-Step Counterfactual Reflexion and Low-Latency Inference}
-To minimize fallback reliance on Python overrides while preventing wasted invalid environment steps, we pair \texttt{ModernSLMAttacker} with \textbf{1-Step Counterfactual Reflexion} (Algorithm~\ref{alg:reflexion}) and two hardware-level GPU inference accelerations in \texttt{HuggingFaceSLMBackend}:
-\begin{enumerate}
-    \item \textbf{Balanced JSON-Brace Early Stopping (\texttt{FirstJsonObject\-Stopping\-Criteria}):} Traditional generation calls with unconstrained token budgets allow small models to emit verbose chain-of-thought or trailing markdown after completing the JSON dictionary. We implement a custom \texttt{transformers.\allowbreak{}StoppingCriteria} state machine that tracks string literals, escapes, and brace depth over newly decoded tokens, halting generation at the exact token where the first top-level JSON object \texttt{\{...\}} closes, with greedy decoding (\texttt{temperature=0.0}) and \texttt{max\_new\_tokens=160} to prevent nested-JSON truncation (e.g., multi-field \texttt{ExfiltrateData} parameter objects) while terminating immediately once the JSON completes.
-    \item \textbf{Static System-Prefix KV-Caching:} Across all steps of an episode and across regimes, the system instruction header rendered via the model's native chat template remains invariant. Our backend splits the formatted prompt at the user boundary, computes \texttt{past\_key\_values} over \texttt{prefix\_ids} once per unique system instruction, and deep-copies the static-prefix \texttt{DynamicCache} to accelerate Pass-1 inference so the model prefills only the compact Belief Graph state tokens.
-    \item \textbf{1-Step Counterfactual Reflexion:} On pass~1, the SLM's raw response is extracted via balanced-brace parsing and checked against \texttt{NetSecGame} legality (\texttt{create\_action\_from\_response}) and semantic non-redundancy. If valid (\texttt{first\_pass\_valid}), the SLM's action executes immediately with zero intervention. Otherwise, when \texttt{enable\_action\_masking=True}, we append the rejected completion alongside a concise counterfactual cue (\textit{``Action rejected: already executed or invalid parameters. Select strictly from the listed permissible actions and output ONE valid JSON object.''}) and perform one corrective generation pass (\texttt{post\_reflexion\_valid}). Only if both passes fail does the harness execute $\arg\max_{a \in \mathcal{A}^{\text{valid}}_t} U(a)$ and increment \texttt{was\_overridden}.
+To maximize genuine SLM autonomy under strict latency and VRAM budgets, \texttt{ModernSLMAttacker} integrates Algorithm~\ref{alg:reflexion} with three runtime optimizations in \texttt{HuggingFaceSLMBackend}:
+\begin{enumerate}[1.]
+    \item \textbf{Balanced JSON-Brace Early Stopping \& Trailing-Brace Repair:} Greedy decoding (\texttt{temperature=0.0}, \texttt{max\_new\_tokens=160}) accommodates multi-field nested \texttt{ExfiltrateData} payloads while \texttt{FirstJsonObjectStoppingCriteria} halts generation on the exact token closing the first top-level \texttt{\{...\}} object. If generation hits EOS or the token cap outside a string literal with $1 \le \text{depth} \le 3$ unclosed braces, the parser appends matching closing braces before JSON validation.
+    \item \textbf{Static System-Prefix KV-Caching:} Because the chat-templated system instruction is invariant across steps, its \texttt{past\_key\_values} prefix is precomputed once per prompt template and deep-copied via \texttt{DynamicCache} on Pass~1 so the GPU prefills only the compact belief-graph state tokens.
+    \item \textbf{1-Step Counterfactual Reflexion:} If Pass~1 passes syntactic and non-redundancy checks (\texttt{first\_pass\_valid}), it executes directly. Otherwise, when \texttt{enable\_action\_masking=True}, one counterfactual feedback cue $c_{\mathrm{cue}}$ (\textit{``Action rejected: already executed or invalid parameters...''}) prompts self-correction (\texttt{post\_reflexion\_valid}); only if both passes fail does the wrapper fall back to $\arg\max_{a \in \mathcal{A}^{\text{valid}}_t} U(a)$ (\texttt{was\_overridden}).
 \end{enumerate}
 
 \begin{algorithm}[t]
 \caption{SLM Decision Loop with 1-Step Reflexion \& Minimax Fallback}
 \label{alg:reflexion}
 \begin{algorithmic}[1]
-\Require Observation $o_t$, system prompt $P_{\mathrm{sys}}$, belief store $\mathcal{G}_t$, masking flag $\mathrm{mask}$
-\Ensure Executed \texttt{NetSecGame} action $a_t$, autonomy telemetry flags
-\State Build structured user prompt $P_{\mathrm{usr}}$ (from $\mathcal{G}_t$ ranked by $U(a)$, or raw text in \texttt{RawReAct})
-\State $r_1 \leftarrow \mathrm{SLM.Generate}([P_{\mathrm{sys}}, P_{\mathrm{usr}}])$ \Comment{Prefix KV-cached + Brace Stopping}
+\Require Observation $o_t$, system prompt $P_{\mathrm{sys}}$, belief store $\mathcal{G}_t$, flag $\mathrm{mask}$
+\Ensure Executed \texttt{NetSecGame} action $a_t$, autonomy flags
+\State Build user prompt $P_{\mathrm{usr}}$ from $\mathcal{G}_t$ ranked by $U(a)$ (or raw text in \texttt{RawReAct})
+\State $r_1 \leftarrow \mathrm{SLM.Generate}([P_{\mathrm{sys}}, P_{\mathrm{usr}}])$ \Comment{Prefix KV-cache + Brace Stop}
 \State $(\mathrm{valid}_1, \mathrm{red}_1, a_1) \leftarrow \mathrm{Validate}(r_1, o_t, \mathcal{G}_t)$
-\State $\mathrm{first\_pass\_valid} \leftarrow \mathrm{valid}_1 \land \neg(\mathrm{use\_memory} \land \mathrm{red}_1)$
-\If{$\mathrm{first\_pass\_valid}$}
-    \State \Return $a_1$, (\texttt{first\_pass=True}, \texttt{post\_ref=True}, \texttt{overridden=False})
+\State $\mathrm{first\_pass} \leftarrow \mathrm{valid}_1 \land \neg(\mathrm{use\_mem} \land \mathrm{red}_1)$
+\If{$\mathrm{first\_pass}$}
+    \State \Return $a_1$, (\texttt{first=T}, \texttt{post\_ref=T}, \texttt{ovr=F})
 \ElsIf{$\neg \mathrm{mask}$}
-    \If{$\mathrm{valid}_1$}
-        \State \Return $a_1$, (\texttt{first\_pass=False}, \texttt{post\_ref=False}, \texttt{overridden=False}) \Comment{Unmasked legal pass-through}
-    \Else
-        \State \Return $\mathrm{None}$, (\texttt{first\_pass=False}, \texttt{post\_ref=False}, \texttt{overridden=False}) \Comment{Strict unmasked penalty}
-    \EndIf
+    \State \Return ($\mathrm{valid}_1$ ? $a_1$ : $\mathrm{None}$), (\texttt{first=F}, \texttt{post\_ref=F}, \texttt{ovr=F})
 \EndIf
-\State $r_2 \leftarrow \mathrm{SLM.Generate}([P_{\mathrm{sys}}, P_{\mathrm{usr}}, r_1, \mathrm{``Action~rejected...''}])$ \Comment{1-Step Reflexion}
+\State $r_2 \leftarrow \mathrm{SLM.Generate}([P_{\mathrm{sys}}, P_{\mathrm{usr}}, r_1, c_{\mathrm{cue}}])$ \Comment{1-Step Reflexion}
 \State $(\mathrm{valid}_2, \mathrm{red}_2, a_2) \leftarrow \mathrm{Validate}(r_2, o_t, \mathcal{G}_t)$
-\If{$\mathrm{valid}_2 \land \neg(\mathrm{use\_memory} \land \mathrm{red}_2)$}
-    \State \Return $a_2$, (\texttt{first\_pass=False}, \texttt{post\_ref=True}, \texttt{overridden=False})
+\If{$\mathrm{valid}_2 \land \neg(\mathrm{use\_mem} \land \mathrm{red}_2)$}
+    \State \Return $a_2$, (\texttt{first=F}, \texttt{post\_ref=T}, \texttt{ovr=F})
 \Else
-    \State $a_{\mathrm{fb}} \leftarrow \arg\max_{a \in \mathcal{A}^{\mathrm{valid}}_t} U(a)$
-    \State \Return $a_{\mathrm{fb}}$, (\texttt{first\_pass=False}, \texttt{post\_ref=False}, \texttt{overridden=True})
+    \State \Return $\arg\max_{a \in \mathcal{A}^{\mathrm{valid}}_t} U(a)$, (\texttt{first=F}, \texttt{post\_ref=F}, \texttt{ovr=T})
 \EndIf
 \end{algorithmic}
 \end{algorithm}
 
-\section{Experimental Setup and Evaluation Protocol}
+\section{Experimental Setup and Statistical Protocol}
 \label{sec:setup}
 
-\subsection{Scenarios, Dynamic Randomization, and Defender Parity}
-To enable strict statistical comparison with Rigaki et al.~\cite{rigaki2026building} (Tables~4 and~5), we evaluate across four randomized \texttt{NetSecGame} scenario configurations parameterized at horizon $T_{\max} = 100$ with \texttt{use\_dynamic\_addresses: True} and per-episode \texttt{randomize\_topology=True}:
-\begin{enumerate}
-    \item \textbf{Regime 1A (\texttt{Full}, Monitor Off):} One client subnet, one server subnet, router, multiple clients and servers, randomized IPs and exfiltration goals on every episode, no active defender.
-    \item \textbf{Regime 1B (\texttt{Full}, Monitor On):} Identical randomized \texttt{Full} topology coupled with the official \texttt{GlobalDefender} stochastic sliding-window detector calibrated to \texttt{NetSecGame} baseline thresholds.
-    \item \textbf{Regime 2A (\texttt{Three-Networks}, Monitor Off):} Multi-hop topology (client subnet $\rightarrow$ router $\rightarrow$ server subnet~A $\rightarrow$ server subnet~B) requiring lateral pivoting into subnet~A before subnet~B hosts become reachable, no active defender.
-    \item \textbf{Regime 2B (\texttt{Three-Networks}, Monitor On):} The hardest multi-hop lateral-movement topology with active \texttt{GlobalDefender} sliding-window monitoring.
+Matching Tables~4 and~5 of \citet{rigaki2026building}, we evaluate four randomized \texttt{NetSecGame} regimes ($T_{\max} = 100$, \texttt{use\_dynamic\_addresses=True}, \texttt{randomize\_topology=True}): \textbf{1A} (\texttt{Full}, NoDef), \textbf{1B} (\texttt{Full}, Monitor On via \texttt{GlobalDefender}), \textbf{2A} (\texttt{Three-Networks}, NoDef, requiring two-hop lateral pivoting from client $\rightarrow$ server subnet~A $\rightarrow$ server subnet~B), and \textbf{2B} (\texttt{Three-Networks}, Monitor On). All seven configurations run on an NVIDIA RTX 5060 Ti (\texttt{16 GB} VRAM, CUDA 13.2) over identical paired seeds \texttt{42..191} ($n=150$ per agent), plus $n=2{,}000$ (\texttt{42..2041}) for \texttt{RandomAttacker}, totaling \textbf{11,600 episodes} across 28 runs:
+\begin{enumerate}[(1)]
+    \item \texttt{Baseline\_RandomAttacker} ($n=2{,}000$): Uniform valid-action sampling.
+    \item \texttt{Baseline\_PureHeuristic}: Non-LLM belief-graph traversal without stealth pacing (\texttt{enable\_stealth\_pacing=False}).
+    \item \texttt{Ablation\_PureHeuristic\_WithStealth}: Deterministic CPU control selecting $\arg\max_{a \in \mathcal{A}^{\text{valid}}_t} U(a)$ (zero LLM calls), isolating utility scaffolding from SLM choice.
+    \item \texttt{Ablation\_SLM\_7B\_NF4\_RawReAct}: Unmasked, memoryless \texttt{Qwen2.5-Coder-7B-Instruct} (\texttt{4-bit NF4})~\citep{hui2024qwen25coder} on raw state text.
+    \item \texttt{Ablation\_\allowbreak{}SLM\_\allowbreak{}7B\_\allowbreak{}NF4\_\allowbreak{}BeliefGraph\_\allowbreak{}NoStealth}: Belief Graph + 1-Step Reflexion without minimax utility.
+    \item \texttt{Proposed\_\allowbreak{}SLM\_\allowbreak{}1.5B\_\allowbreak{}BF16\_\allowbreak{}BeliefGraph\_\allowbreak{}WithStealth}: Compact \texttt{Qwen2.5-\allowbreak{}Coder-\allowbreak{}1.5B-\allowbreak{}Instruct} (\texttt{bfloat16}) with full stack.
+    \item \texttt{Proposed\_\allowbreak{}SLM\_\allowbreak{}7B\_\allowbreak{}NF4\_\allowbreak{}BeliefGraph\_\allowbreak{}WithStealth}: Full \texttt{Qwen2.5-\allowbreak{}Coder-\allowbreak{}7B-\allowbreak{}Instruct} (\texttt{4-bit NF4}) with full stack.
 \end{enumerate}
 
-All 150-episode configurations share \textbf{identical paired per-episode seeds (\texttt{42..191})} so randomized IP layouts, host footholds, and target objects are matched 1-to-1 across agents. Consistent with Rigaki et al.~\cite{rigaki2026building}, the uniform \texttt{RandomAttacker} baseline is evaluated over \textbf{2,000 randomized episodes} (\texttt{seeds 42..2041}) per regime, totaling \textbf{11,600 simulated episodes} across all 28 experimental runs.
+Paired comparisons use exact two-sided \textbf{McNemar's test}~\citep{mcnemar1947note} (wins) and paired \textbf{Wilcoxon signed-rank tests}~\citep{wilcoxon1945individual} with \textbf{Cliff's $\delta$}~\citep{cliff1993dominance} (returns/steps); external baselines from \citet{rigaki2026building} use two-sided unpaired two-proportion $z$-tests. Automated AST testing (\texttt{15/15} passing) verifies zero hardcoded IPs, CIDRs, service banners, or scenario strings in \texttt{research\_extension/}.
 
-\subsection{Evaluated Agent Configurations and Hardware Environment}
-All experiments ran on a single local workstation equipped with an NVIDIA GeForce RTX 5060 Ti (\texttt{16 GB} VRAM, Blackwell architecture, CUDA 13.2) inside \texttt{NetSecGame} via deterministic per-episode JSONL checkpointing (\texttt{benchmark\_runner.py}). We evaluate seven paired configurations per regime:
-\begin{itemize}
-    \item \texttt{Baseline\_RandomAttacker} ($n=2{,}000$): Uniformly samples valid actions from \texttt{generate\_valid\_actions}.
-    \item \texttt{Baseline\_PureHeuristic} ($n=150$): Deterministic non-LLM rule agent traversing unexplored belief-graph candidates without stealth pacing (\texttt{enable\_stealth\_pacing=False}).
-    \item \texttt{Ablation\_PureHeuristic\_WithStealth} ($n=150$): Pure deterministic CPU control selecting $\arg\max_{a \in \mathcal{A}_t^{\mathrm{valid}}} U(a)$ directly from the Belief Graph + Multi-Scale Minimax Hazard Utility (\texttt{use\_memory=True}, \texttt{enable\_action\_masking=True}, \texttt{enable\_stealth\_pacing=True}, zero LLM calls), isolating how much stealth gain arises from the utility scaffold alone.
-    \item \texttt{Ablation\_SLM\_7B\_NF4\_RawReAct} ($n=150$): Unmasked, memoryless \texttt{Qwen2.5-Coder-7B-Instruct} (\texttt{4-bit NF4}) prompted strictly with raw \texttt{create\_status\_from\_state} text (\texttt{use\_memory=False}, \texttt{enable\_action\_masking=False}).
-    \item \texttt{Ablation\_SLM\_7B\_NF4\_BeliefGraph\_NoStealth} ($n=150$): Belief Graph + 1-Step Reflexion without temporal stealth utility (\texttt{enable\_stealth\_pacing=False}).
-    \item \texttt{Proposed\_SLM\_1.5B\_BF16\_BeliefGraph\_WithStealth} ($n=150$): Ultra-compact \texttt{Qwen2.5-Coder-1.5B-Instruct} (\texttt{bfloat16}) with full Belief Graph, Multi-Scale Minimax Utility $U(a)$, and 1-Step Reflexion.
-    \item \texttt{Proposed\_SLM\_7B\_NF4\_BeliefGraph\_WithStealth} ($n=150$): Full \texttt{Qwen2.5-Coder-7B-Instruct} (\texttt{4-bit NF4})~\cite{hui2024qwen25coder} with Belief Graph, Multi-Scale Minimax Utility $U(a)$, and 1-Step Reflexion.
-\end{itemize}
-
-\subsection{Metrics and Integrity Verification}
-Beyond ESWA outcomes (\texttt{Win \%}, \texttt{Detect \%}, \texttt{Return}, \texttt{Steps}) with 95\% confidence intervals ($\pm 1.96 \cdot \sigma / \sqrt{n}$), we explicitly report: \texttt{FirstPass \%} (fraction of steps where pass-1 SLM output is legal and non-redundant), \texttt{PostReflexion \%} (autonomy rate after 1-step reflexion without fallback), \texttt{Override \%} (fraction requiring $\arg\max_a U(a)$ fallback), mean sliding-window Shannon entropy $H_t$ ($w=5$), \texttt{Peak VRAM (MB)} (\texttt{torch.cuda.max\_memory\_allocated}), and \texttt{Latency (ms/step)}. Paired statistical significance across our matched 150-episode runs is quantified via exact two-sided \textbf{McNemar's test}~\cite{mcnemar1947note} for win rates and paired \textbf{Wilcoxon signed-rank test}~\cite{wilcoxon1945individual} with \textbf{Cliff's $\delta$}~\cite{cliff1993dominance} effect sizes for returns and step counts, while comparisons against independent external published baselines (\texttt{Hackphyr-7B}, \texttt{GPT-4}~\cite{rigaki2026building}) use two-sided unpaired two-proportion $z$-tests. Automated AST validation (\texttt{test\_zero\_hardcoding\_ast\_scan}, 15/15 unit tests passing) confirms zero hardcoded IPs, CIDR strings, service names, or scenario identifiers in \texttt{research\_extension/}.
-
-\section{Experimental Results and Statistical Analysis}
+\section{Results and Discussion}
 \label{sec:results}
 
-\subsection{Performance Across Monitor-Off Regimes (Tables 4-Parity)}
-Table~\ref{tab:regime_nodef} summarizes empirical outcomes across the baseline \texttt{Full} (\texttt{Regime 1A}) and multi-hop \texttt{Three-Networks} (\texttt{Regime 2A}) topologies when no active monitor is present.
+\subsection{No-Defender and Monitor-On Performance (Tables 1--2)}
+Tables~\ref{tab:regime_nodef} and~\ref{tab:regime_def} report all four regimes. Without a belief graph, \texttt{RawReAct} attains \texttt{0.00\%} wins everywhere, repeating valid \texttt{ScanNetwork} JSONs (\texttt{0.000} bits entropy) until timeout (NoDef) or \texttt{98.67\%} detection (Monitor On). Adding $\mathcal{G}_t$ alone (\texttt{NoStealth}) raises \texttt{7B-NF4} wins to \texttt{66.67\%} (\texttt{1A}) and \texttt{60.00\%} (\texttt{2A}), yet under active monitoring breadth-first bursts trigger \texttt{72.00\%} (\texttt{1B}) and \texttt{78.67\%} (\texttt{2B}) alerts with negative returns (\texttt{-6.08} and \texttt{-15.77}).
+
+Enabling Multi-Scale Minimax Hazard Utility $U(a)$ lifts \texttt{7B-NF4} to \texttt{98.67\%} (\texttt{1A}, trimming $28.3$ steps [$61.70 \rightarrow 33.37$]) and \texttt{94.67\%} (\texttt{2A}, trimming $25.7$ steps [$67.83 \rightarrow 42.09$]), while cutting monitored detection nearly in half to \texttt{36.67\%} (\texttt{63.33\%} wins, \texttt{+36.11} return in \texttt{1B}) and \texttt{40.00\%} (\texttt{59.33\%} wins, \texttt{+28.01} return in \texttt{2B}). On RTX 5060 Ti, \texttt{7B-NF4} runs at \texttt{1,669.35--1,836.86 ms/step} inside \texttt{5.91--5.92 GB} peak VRAM (\texttt{6,048.96--6,067.20 MB})---over $10\times$ faster than the \texttt{19.87 s/inference} on V100 in \citet{rigaki2026building}---while \texttt{1.5B-BF16} runs at \texttt{1,269.42--1,368.86 ms/step} in \texttt{3.22 GB} VRAM (\texttt{3,300.38--3,301.64 MB}).
 
 \begin{table*}[t]
 \centering
-\caption{Evaluation in No-Defender regimes (\texttt{max\_steps = 100}; $n=150$ paired episodes on seeds \texttt{42..191}, except Random $n=2{,}000$). Mean $\pm$ 95\% CI. For unmasked \texttt{RawReAct} (\texttt{use\_memory=False}, \texttt{enable\_action\_masking=False}) and non-LLM baselines, \texttt{FirstPass\%} reflects state-legal JSON syntax without redundancy filtering or reflexion.}
+\caption{Evaluation in No-Defender regimes (\texttt{max\_steps = 100}; $n=150$ paired episodes on seeds \texttt{42..191}, except Random $n=2{,}000$). Mean $\pm$ 95\% CI. For unmasked \texttt{RawReAct} and non-LLM baselines, \texttt{FirstPass\%} reflects state-legal JSON syntax without redundancy filtering or reflexion.}
 \label{tab:regime_nodef}
 \setlength{\tabcolsep}{3.5pt}
 \footnotesize
@@ -313,14 +268,9 @@ Regime & Configuration & Win \% & Return & Steps & FirstPass\% & PostRef\% & Ovr
 }
 \end{table*}
 
-Without a structured belief graph, \texttt{Ablation\_SLM\_7B\_NF4\_RawReAct} achieves \texttt{0.00\%} wins in both No-Defender regimes: it repeatedly emits syntactically valid \texttt{ScanNetwork} JSONs (\texttt{100\%} valid syntax, \texttt{0.000} bits entropy) and times out at $100.0$ steps (\texttt{-110.0} return). Adding the Topological Belief Graph alone (\texttt{NoStealth}) lifts \texttt{7B-NF4} win rates to \texttt{66.67\%} (\texttt{Full}) and \texttt{60.00\%} (\texttt{Three-Networks}). Crucially, even when no defender is present, integrating Multi-Scale Minimax Utility $U(a)$ boosts \texttt{7B-NF4} completion to \texttt{98.67\%} in \texttt{Full} (McNemar $p < 10^{-6}$, trimming trajectories by $28.3$ steps [$61.70 \rightarrow 33.37$], Wilcoxon $p < 10^{-6}$, Cliff's $\delta = -0.4260$) and \texttt{94.67\%} in \texttt{Three-Networks} (McNemar $p < 10^{-6}$, trimming $25.7$ steps [$67.83 \rightarrow 42.09$], Cliff's $\delta = -0.3682$), because depth-first kill-chain ranking prevents wasteful breadth-first scanning across unreachable secondary hosts. Meanwhile, \texttt{Proposed\_1.5B\_BF16} achieves \texttt{95.33\%} (\texttt{Full}) and \texttt{86.67\%} (\texttt{Three-Networks}) at \texttt{3.22 GB} VRAM (\texttt{3,300.47--3,301.64 MB}) and \texttt{1.30--1.37 s/step} latency (\texttt{1.76--1.84 s/step} for \texttt{7B-NF4}).
-
-\subsection{Performance Against Active Sliding-Window Monitors (Tables 5-Parity)}
-When \texttt{GlobalDefender} is activated (\texttt{Regime 1B} and \texttt{Regime 2B}, Table~\ref{tab:regime_def}), unconstrained breadth-first exploration incurs severe alert rates, sharply separating stealth-aware planning from greedy heuristics and \texttt{NoStealth} ablations.
-
 \begin{table*}[t]
 \centering
-\caption{Evaluation in Monitor-On regimes (\texttt{max\_steps = 100}; $n=150$ paired episodes on seeds \texttt{42..191}, except Random $n=2{,}000$). Mean $\pm$ 95\% CI. For unmasked \texttt{RawReAct} (\texttt{use\_memory=False}, \texttt{enable\_action\_masking=False}) and non-LLM baselines, \texttt{FirstPass\%} reflects state-legal JSON syntax without redundancy filtering or reflexion.}
+\caption{Evaluation in Monitor-On regimes (\texttt{max\_steps = 100}; $n=150$ paired episodes on seeds \texttt{42..191}, except Random $n=2{,}000$). Mean $\pm$ 95\% CI.}
 \label{tab:regime_def}
 \setlength{\tabcolsep}{3.5pt}
 \footnotesize
@@ -351,14 +301,12 @@ Regime & Configuration & Win \% & Detect \% & Return & Steps & FirstPass\% & Pos
 }
 \end{table*}
 
-Under active SIEM monitoring, removing stealth utility causes \texttt{Ablation\_SLM\_7B\_NF4\_BeliefGraph\_NoStealth} to trigger alerts on \texttt{72.00\%} (\texttt{Regime 1B}) and \texttt{78.67\%} (\texttt{Regime 2B}) of episodes, yielding negative returns (\texttt{-6.08} and \texttt{-15.77}). Similarly, \texttt{Baseline\_PureHeuristic} gets detected in \texttt{52.00\%} (\texttt{Full}) and \texttt{59.33\%} (\texttt{Three-Networks}) of runs. Activating Multi-Scale Minimax Hazard Utility $U(a)$ cuts detection nearly in half---down to \texttt{36.67\% $\pm$ 7.74\%} in \texttt{Full} (\texttt{63.33\%} wins, \texttt{+36.11} return) and \texttt{40.00\% $\pm$ 7.87\%} in \texttt{Three-Networks} (\texttt{59.33\%} wins, \texttt{+28.01} return). Average inference latency on RTX 5060 Ti was \texttt{1,669.35 ms/step} (\texttt{Full}) and \texttt{1,678.30 ms/step} (\texttt{Three-Networks}) for \texttt{7B-NF4} (\texttt{5.91 GB} VRAM: \texttt{6,054.33} and \texttt{6,048.96 MB}; overall 4-regime peak \texttt{5.92 GB} = \texttt{6,067.20 MB}) and \texttt{1,269.42--1,293.91 ms/step} for \texttt{1.5B-BF16} (\texttt{3.22 GB} VRAM: \texttt{3,300.38--3,300.39 MB}), over $10\times$ faster than the \texttt{19.87 s/inference} reported on V100 in~\cite{rigaki2026building}.
-
-\subsection{Paired Statistical Significance Testing}
-Table~\ref{tab:stats_tests} reports exact paired non-parametric hypothesis tests comparing \texttt{Proposed\_SLM\_7B\_NF4\_BeliefGraph\_WithStealth} against every key baseline across all 150 paired seeds (\texttt{42..191}).
+\subsection{Paired Hypothesis Tests and External Comparison vs.\ \citet{rigaki2026building}}
+Table~\ref{tab:stats_tests} confirms highly significant paired improvements for \texttt{7B-NF4} over \texttt{BeliefGraph\_NoStealth} across all four regimes (McNemar $p < 10^{-6}$; Cliff's $\delta \in [+0.3705, +0.4549]$ on return) and over unpaced \texttt{PureHeuristic} in \texttt{1B} ($p = 0.0011$), \texttt{2A} ($p < 10^{-6}$), and \texttt{2B} ($p = 3.0 \times 10^{-5}$). Against the deterministic stealth control \texttt{Ablation\_PureHeuristic\_WithStealth} ($\arg\max_a U(a)$), \texttt{7B-NF4} achieves statistical win-rate parity in \texttt{1A} ($p = 0.500$), \texttt{2A} ($p = 0.804$, \texttt{94.67\%} vs.\ \texttt{93.33\%}), and \texttt{2B} ($p = 0.175$), with a modest $8.00\text{ pp}$ gap in \texttt{1B} ($p = 0.0428$) from exploratory SLM steps ($6.1$--$10.5$ extra steps; Wilcoxon $p \le 3 \times 10^{-6}$). Figure~\ref{fig:ablation} visualizes these ablation shifts alongside SLM decision autonomy.
 
 \begin{table*}[t]
 \centering
-\caption{Paired statistical tests ($n = 150$, seeds \texttt{42..191}): exact two-sided McNemar $p$-value with discordant pairs $(b,c)$, paired Wilcoxon signed-rank $p$-value, and Cliff's $\delta$ effect size for \texttt{Proposed\_SLM\_7B\_NF4\_BeliefGraph\_WithStealth} versus paired baselines and the deterministic stealth control.}
+\caption{Paired statistical tests ($n = 150$, seeds \texttt{42..191}): exact two-sided McNemar $p$-value with discordant pairs $(b,c)$, paired Wilcoxon signed-rank $p$-value, and Cliff's $\delta$ for \texttt{Proposed\_SLM\_7B\_NF4\_BeliefGraph\_WithStealth} versus paired baselines.}
 \label{tab:stats_tests}
 \setlength{\tabcolsep}{3.5pt}
 \footnotesize
@@ -367,25 +315,25 @@ Table~\ref{tab:stats_tests} reports exact paired non-parametric hypothesis tests
 \toprule
 Regime & Comparator & McNemar $p$ (Win) & Discordant $(b,c)$ & Wilcoxon $p$ (Ret.) & Cliff's $\delta$ (Ret.) & Wilcoxon $p$ (Steps) & Cliff's $\delta$ (Steps) \\
 \midrule
-1A (\texttt{Full}, NoDef) & vs. \texttt{BeliefGraph\_\allowbreak{}NoStealth} & $\mathbf{< 10^{-6}}$ & $(50, 2)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.4260}$ & $\mathbf{< 10^{-6}}$ & $\mathbf{-0.4260}$ \\
+1A (\texttt{Full}, NoDef) & vs. \texttt{BeliefGraph\_NoStealth} & $\mathbf{< 10^{-6}}$ & $(50, 2)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.4260}$ & $\mathbf{< 10^{-6}}$ & $\mathbf{-0.4260}$ \\
 1A (\texttt{Full}, NoDef) & vs. \texttt{PureHeuristic} & $0.289062$ & $(6, 2)$ & $0.132773$ & $-0.0186$ & $0.145167$ & $+0.0186$ \\
 1A (\texttt{Full}, NoDef) & vs. \texttt{PureHeuristic\_WithStealth} & $0.500000$ & $(0, 2)$ & $0.000001$ & $-0.3258$ & $0.000001$ & $+0.3258$ \\
 1A (\texttt{Full}, NoDef) & vs. \texttt{RawReAct} & $\mathbf{< 10^{-6}}$ & $(148, 0)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.9867}$ & $\mathbf{< 10^{-6}}$ & $\mathbf{-0.9867}$ \\
 1A (\texttt{Full}, NoDef) & vs. \texttt{Proposed\_1.5B\_BF16} & $0.179688$ & $(7, 2)$ & $< 10^{-6}$ & $+0.3288$ & $< 10^{-6}$ & $-0.3289$ \\
 \midrule
-1B (\texttt{Full}, Mon. On) & vs. \texttt{BeliefGraph\_\allowbreak{}NoStealth} & $\mathbf{< 10^{-6}}$ & $(60, 5)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.4390}$ & $0.806417$ & $+0.0093$ \\
+1B (\texttt{Full}, Mon. On) & vs. \texttt{BeliefGraph\_NoStealth} & $\mathbf{< 10^{-6}}$ & $(60, 5)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.4390}$ & $0.806417$ & $+0.0093$ \\
 1B (\texttt{Full}, Mon. On) & vs. \texttt{PureHeuristic} & $0.001089$ & $(35, 12)$ & $0.148859$ & $+0.0712$ & $0.015983$ & $+0.1677$ \\
 1B (\texttt{Full}, Mon. On) & vs. \texttt{PureHeuristic\_WithStealth} & $0.042774$ & $(9, 21)$ & $< 10^{-6}$ & $-0.3096$ & $< 10^{-6}$ & $+0.2487$ \\
 1B (\texttt{Full}, Mon. On) & vs. \texttt{RawReAct} & $\mathbf{< 10^{-6}}$ & $(95, 0)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.7492}$ & $0.903191$ & $+0.0439$ \\
 1B (\texttt{Full}, Mon. On) & vs. \texttt{Proposed\_1.5B\_BF16} & $0.000941$ & $(32, 10)$ & $0.000001$ & $+0.2725$ & $0.006517$ & $-0.1102$ \\
 \midrule
-2A (\texttt{ThreeNets}, NoDef) & vs. \texttt{BeliefGraph\_\allowbreak{}NoStealth} & $\mathbf{< 10^{-6}}$ & $(56, 4)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.3705}$ & $\mathbf{< 10^{-6}}$ & $\mathbf{-0.3682}$ \\
+2A (\texttt{ThreeNets}, NoDef) & vs. \texttt{BeliefGraph\_NoStealth} & $\mathbf{< 10^{-6}}$ & $(56, 4)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.3705}$ & $\mathbf{< 10^{-6}}$ & $\mathbf{-0.3682}$ \\
 2A (\texttt{ThreeNets}, NoDef) & vs. \texttt{PureHeuristic} & $\mathbf{< 10^{-6}}$ & $(44, 7)$ & $0.284268$ & $-0.0384$ & $0.511419$ & $+0.0404$ \\
 2A (\texttt{ThreeNets}, NoDef) & vs. \texttt{PureHeuristic\_WithStealth} & $0.803619$ & $(9, 7)$ & $0.000005$ & $-0.3042$ & $0.000003$ & $+0.3046$ \\
 2A (\texttt{ThreeNets}, NoDef) & vs. \texttt{RawReAct} & $\mathbf{< 10^{-6}}$ & $(142, 0)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.9467}$ & $\mathbf{< 10^{-6}}$ & $\mathbf{-0.9400}$ \\
 2A (\texttt{ThreeNets}, NoDef) & vs. \texttt{Proposed\_1.5B\_BF16} & $0.028959$ & $(19, 7)$ & $0.000119$ & $+0.3015$ & $0.000135$ & $-0.3006$ \\
 \midrule
-2B (\texttt{ThreeNets}, Mon. On) & vs. \texttt{BeliefGraph\_\allowbreak{}NoStealth} & $\mathbf{< 10^{-6}}$ & $(64, 4)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.4549}$ & $0.259771$ & $+0.0600$ \\
+2B (\texttt{ThreeNets}, Mon. On) & vs. \texttt{BeliefGraph\_NoStealth} & $\mathbf{< 10^{-6}}$ & $(64, 4)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.4549}$ & $0.259771$ & $+0.0600$ \\
 2B (\texttt{ThreeNets}, Mon. On) & vs. \texttt{PureHeuristic} & $\mathbf{0.000030}$ & $(45, 13)$ & $0.080383$ & $+0.1105$ & $0.010027$ & $+0.1884$ \\
 2B (\texttt{ThreeNets}, Mon. On) & vs. \texttt{PureHeuristic\_WithStealth} & $0.175465$ & $(13, 22)$ & $0.000001$ & $-0.2593$ & $< 10^{-6}$ & $+0.2736$ \\
 2B (\texttt{ThreeNets}, Mon. On) & vs. \texttt{RawReAct} & $\mathbf{< 10^{-6}}$ & $(89, 0)$ & $\mathbf{< 10^{-6}}$ & $\mathbf{+0.6526}$ & $0.000017$ & $+0.2262$ \\
@@ -395,21 +343,18 @@ Regime & Comparator & McNemar $p$ (Win) & Discordant $(b,c)$ & Wilcoxon $p$ (Ret
 }
 \end{table*}
 
-Across all four regimes, win-rate superiority over \texttt{BeliefGraph\_\allowbreak{}NoStealth} is highly significant (McNemar $p < 10^{-6}$; discordant wins $(50,2)$, $(60,5)$, $(56,4)$, and $(64,4)$), accompanied by large Cliff's $\delta$ return improvements ($\delta \in [+0.3705, +0.4549]$). Against non-stealth \texttt{Baseline\_PureHeuristic}, win-rate gains are decisive in \texttt{Full + Monitor On} ($p = 0.0011$), \texttt{Three-Networks NoDef} ($p < 10^{-6}$), and \texttt{Three-Networks + Monitor On} ($p = 3.0 \times 10^{-5}$). When compared against the deterministic stealth control \texttt{Ablation\_\allowbreak{}PureHeuristic\_\allowbreak{}WithStealth} ($\arg\max_a U(a)$ with zero LLM calls), \texttt{Proposed\_\allowbreak{}SLM\_\allowbreak{}7B\_\allowbreak{}NF4} preserves statistical win-rate parity in \texttt{Regime 1A} ($p = 0.500$), \texttt{Regime 2A} ($p = 0.804$, edging it at \texttt{94.67\%} vs. \texttt{93.33\%}), and \texttt{Regime 2B} ($p = 0.175$), with a modest $8.00\text{ pp}$ gap in \texttt{Regime 1B} ($p = 0.0428$) driven by exploratory SLM trajectory variation ($6.1$--$10.5$ extra steps; Wilcoxon $p \le 10^{-5}$). Figure~\ref{fig:ablation}(a)--(b) visualizes the Win Rate and Monitor Alert Rate shifts across all seven evaluated configurations with 95\% confidence bars, while Figure~\ref{fig:ablation}(c) breaks down SLM decision autonomy into first-pass validity, 1-step reflexion recovery, and residual minimax overrides.
-
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig3_ablation_and_autonomy.pdf}
-    \caption{(a)--(b) Ablation of Win Rate (\%) and Monitor Alert Rate (\%) with 95\% confidence intervals across all 7 configurations ($n=150$ per agent; $n=2{,}000$ for Random baseline) in \texttt{Full + Monitor On} and \texttt{Three-Networks + Monitor On}; (c) stacked SLM Decision Autonomy Breakdown (\texttt{FirstPassValid \%}, \texttt{+1-Step Reflexion Gain \%}, and \texttt{Minimax Override \%}).}
+    \includegraphics[width=0.90\textwidth]{figures/fig3_ablation_and_autonomy.pdf}
+    \caption{(a)--(b) Win Rate (\%) and Monitor Alert Rate (\%) with 95\% confidence intervals across all 7 configurations in \texttt{Full + Monitor On} and \texttt{Three-Networks + Monitor On}; (c) SLM Decision Autonomy Breakdown (\texttt{FirstPassValid~\%}, \texttt{+1-Step Reflexion Gain~\%}, and \texttt{Minimax Override~\%}).}
     \label{fig:ablation}
 \end{figure*}
 
-\subsection{Direct Comparison with Rigaki et al. (ESWA 2026)}
-Table~\ref{tab:eswa_comparison} aligns our empirical benchmarks directly against the exact published results in Rigaki et al.~\cite{rigaki2026building} (Tables~4 and~5), reporting both our native return scale (\texttt{-10} detection / \texttt{-10} timeout) and ESWA-2026-parity returns (\texttt{-50} detection / \texttt{0} timeout beyond \texttt{-1/step}), together with two-sided unpaired two-proportion $z$-tests against independent external baselines.
+Table~\ref{tab:eswa_comparison} aligns our results directly with \citet{rigaki2026building} (Tables~4 and~5). Zero-shot \texttt{Proposed 7B-NF4} surpasses fine-tuned \texttt{Hackphyr-7B} across all four regimes via unpaired $z$-tests: \texttt{+9.57 pp} in \texttt{1A} ($z=+3.48, p=4.98 \times 10^{-4}$), \texttt{+19.33 pp} in \texttt{1B} ($z=+3.58, p=3.40 \times 10^{-4}$), \texttt{+44.33 pp} in \texttt{2A} ($z=+8.60, p=8.08 \times 10^{-18}$), and \textbf{\texttt{+36.00 pp} in \texttt{2B} (\texttt{59.33\%} vs.\ \texttt{23.33\%}, $z=+6.33, p=2.43 \times 10^{-10}$)}, while halving GPU memory from $\approx 14~\text{GB}$ to \texttt{5.91--5.92 GB}. It further outperforms cloud \texttt{GPT-4} on \texttt{Three-Networks NoDef} (\texttt{94.67\%} vs.\ \texttt{82.35\%}, $z=+2.36, p=0.0185$) and \texttt{Three-Networks + Monitor On} (\texttt{59.33\%} vs.\ \texttt{36.36\%}, $z=+2.31, p=0.0208$), flipping \texttt{GPT-4}'s \texttt{-21.69} return into \texttt{+12.08} under ESWA-50 parity (\texttt{+28.01} native) while matching \texttt{GPT-4} statistically in \texttt{Full} ($p \ge 0.304$). Even \texttt{1.5B-BF16} (\texttt{3.22 GB}) outperforms \texttt{Hackphyr-7B} in \texttt{1A} ($p=0.0408$), \texttt{2A} ($p=1.26 \times 10^{-11}$), and \texttt{2B} ($p=3.68 \times 10^{-4}$). Note that our \texttt{RandomAttacker} rate on \texttt{Full} (\texttt{4.65\%}) is lower than Table~4 of \citet{rigaki2026building} (\texttt{31.16\%}) because our YAML profiles randomize starting/goal hosts alongside \texttt{use\_dynamic\_addresses=True}.
 
 \begin{table*}[t]
 \centering
-\caption{Direct comparison against exact published baselines from Rigaki et al.~\cite{rigaki2026building} (Tables~4 and~5, \texttt{max\_steps = 100}). Cell format for our runs: \texttt{Win\% $\pm$ CI95 (Native / ESWA-50 Return)}, where ESWA-50 calibrates rewards to the ESWA~2026 penalty scale (\texttt{-50} detection penalty and \texttt{0} extra timeout penalty vs.\ \texttt{-10}/\texttt{-10} in local YAML). Note that \texttt{Q-learning} required fixed episode IP layouts, whereas all LLM/SLM evaluations use randomized dynamic addressing.}
+\caption{Direct comparison against exact published baselines from \citet{rigaki2026building} (Tables~4 and~5, \texttt{max\_steps = 100}). Cell format for our runs: \texttt{Win\% $\pm$ CI95 (Native / ESWA-50 Return)}. \texttt{Q-learning} required fixed episode IPs; all LLM/SLM runs use dynamic addressing.}
 \label{tab:eswa_comparison}
 \setlength{\tabcolsep}{3.0pt}
 \footnotesize
@@ -422,7 +367,7 @@ Agent / Method & Peak VRAM / Compute & Full (NoDef) & Full (Mon. On) & Three-Net
 \texttt{Random} (Ours, $n=2{,}000$) & CPU & $4.65 \pm 0.92$ ($-103.55 / -94.01$) & $0.25 \pm 0.22$ ($-32.24 / -71.99$) & $3.30 \pm 0.78$ ($-105.50 / -95.83$) & $0.30 \pm 0.24$ ($-32.29 / -71.97$) \\
 \texttt{Q-learning} (ESWA 2026 Ref, fixed IPs) & CPU (50k ep train) & $67.71 \pm 4.09$ ($25.49$) & $\mathbf{71.57 \pm 3.95}$ ($42.94$) & $0.00 \pm 0.00$ ($-100.00$) & $0.00 \pm 0.00$ ($-70.45$) \\
 \texttt{GPT-3.5-turbo} (ESWA 2026 Ref) & Cloud API & $30.00 \pm 16.40$ ($-51.67$) & $16.67 \pm 13.33$ ($-58.00$) & $10.00 \pm 10.73$ ($-87.50$) & $6.67 \pm 8.93$ ($-63.63$) \\
-\texttt{Zephyr-7B-$\beta$} (ESWA 2026 Ref) & $\approx 14~\text{GB}$ FP16 & $23.65 \pm 4.80$ ($-51.77$) & $3.33 \pm 2.03$ ($-66.68$) & $1.75 \pm 1.97$ ($-98.80$) & $0.62 \pm 1.21$ ($-70.42$) \\
+\texttt{Zephyr-7b-$\beta$} (ESWA 2026 Ref) & $\approx 14~\text{GB}$ FP16 & $23.65 \pm 4.80$ ($-51.77$) & $3.33 \pm 2.03$ ($-66.68$) & $1.75 \pm 1.97$ ($-98.80$) & $0.62 \pm 1.21$ ($-70.42$) \\
 \texttt{Hackphyr} (ESWA 2026 Ref, SFT 7B) & $\approx 14~\text{GB}$ FP16 & $89.10 \pm 4.74$ ($61.03$) & $44.00 \pm 6.88$ ($3.56$) & $50.34 \pm 8.00$ ($-14.26$) & $23.33 \pm 6.77$ ($-37.67$) \\
 \texttt{GPT-4} (ESWA 2026 Ref) & Cloud API & $\mathbf{100.00 \pm 0.00}$ ($77.13$) & $53.33 \pm 17.85$ ($8.80$) & $82.35 \pm 13.64$ ($18.78$) & $36.36 \pm 17.21$ ($-21.69$) \\
 \midrule
@@ -433,70 +378,41 @@ Agent / Method & Peak VRAM / Compute & Full (NoDef) & Full (Mon. On) & Three-Net
 }
 \end{table*}
 
-Without any supervised fine-tuning or domain-specific examples, \texttt{Proposed 7B-NF4} outperforms fine-tuned \texttt{Hackphyr-7B} across all four configurations via unpaired two-proportion $z$-tests: \texttt{+9.57 pp} in \texttt{Full NoDef} (\texttt{98.67\%} vs. \texttt{89.10\%}, $z = +3.48, p = 4.98 \times 10^{-4}$), \texttt{+19.33 pp} in \texttt{Full + Monitor On} (\texttt{63.33\%} vs. \texttt{44.00\%}, $z = +3.58, p = 3.40 \times 10^{-4}$), \texttt{+44.33 pp} in \texttt{Three-Networks NoDef} (\texttt{94.67\%} vs. \texttt{50.34\%}, $z = +8.60, p = 8.08 \times 10^{-18}$), and \textbf{\texttt{+36.00 pp} in \texttt{Three-Networks + Monitor On} (\texttt{59.33\%} vs. \texttt{23.33\%}, $z = +6.33, p = 2.43 \times 10^{-10}$)}---while cutting VRAM from $\approx 14~\text{GB}$ down to \texttt{5.91--5.92 GB}. Equally noteworthy, \texttt{Proposed 7B-NF4} surpasses cloud-based \texttt{GPT-4} in \texttt{Three-Networks NoDef} (\texttt{94.67\%} vs. \texttt{82.35\%}, $z = +2.36, p = 0.0185$) and \texttt{Three-Networks + Monitor On} (\texttt{59.33\%} vs. \texttt{36.36\%}, $z = +2.31, p = 0.0208$), reversing \texttt{GPT-4}'s \texttt{-21.69} negative return into \texttt{+12.08} under ESWA-50 parity (\texttt{+28.01} native) while matching \texttt{GPT-4} statistically in \texttt{Full} regimes ($p \ge 0.304$). Even our ultra-lightweight \texttt{1.5B-BF16} agent (\texttt{3.22 GB} VRAM) exceeds fine-tuned \texttt{Hackphyr-7B} across every regime (significant at $p = 0.0408$ in 1A, $p = 1.26 \times 10^{-11}$ in 2A, and $p = 3.68 \times 10^{-4}$ in 2B) and edges \texttt{GPT-4} on \texttt{Three-Networks + Monitor On} (\texttt{42.67\%} vs. \texttt{36.36\%}, $p = 0.522$). Note that our \texttt{RandomAttacker} win rate in \texttt{Full} (\texttt{4.65\%}) differs from Rigaki et al.'s Table~4 (\texttt{31.16\%}) because our \texttt{scenarios/scenario\_full\_*.yaml} enables \texttt{use\_dynamic\_addresses=True} and randomized starting/goal hosts in every episode, making accidental random exfiltration far harder.
-
-\subsection{Markov Behavioral Transitions, Entropy Trajectories, and Phase Arrival}
-To inspect \textit{how} our planner avoids detection mechanically, Figure~\ref{fig:markov} contrasts empirical 7$\times$7 Markov action-transition probability matrices across \texttt{RawReAct}, \texttt{BeliefGraph\_\allowbreak{}NoStealth}, and \texttt{BeliefGraph + Minimax Utility (WithStealth)} on \texttt{Three-Networks + Monitor On} ($n=150$).
+\subsection{Behavioral Mechanism, Entropy, and Architectural Takeaways}
+Figure~\ref{fig:markov} explains these gains mechanically on \texttt{Three-Networks + Monitor On}: \texttt{RawReAct} traps itself in a \texttt{1.00} \texttt{ScanNetwork} self-loop ($H_t = 0.000$ bits); \texttt{NoStealth} exhibits \texttt{0.54} \texttt{FindServices}, \texttt{0.34} \texttt{ScanNetwork}, and \texttt{0.66} \texttt{ExfiltrateData} self-loops ($H_t = 0.968$ bits) that trip \texttt{GlobalDefender}; and \texttt{WithStealth} collapses self-loops to \texttt{0.04}, \texttt{0.11}, \texttt{0.02}, and \texttt{0.12} while channeling \texttt{FindServices} $\rightarrow$ \texttt{ExploitService} (\texttt{0.38}) and \texttt{ExploitService} $\rightarrow$ \texttt{FindData} (\texttt{0.70}), lifting entropy to $H_t = 1.774$ bits. Phase-arrival logs confirm earlier remote pivoting: \texttt{115/150} episodes reach \texttt{ExploitService} at median step \texttt{11.0} (mean \texttt{11.31}) under \texttt{WithStealth} in \texttt{2B}, versus \texttt{89/150} at median \texttt{14.0} (mean \texttt{14.63}) for \texttt{NoStealth} (and \texttt{111/150} at median \texttt{10.0} vs.\ \texttt{97/150} at \texttt{14.0} in \texttt{1B}). Figure~\ref{fig:pareto} shows sustained step-wise diversity ($H_t \approx 1.63$--$1.77$ bits) and strict Pareto dominance over \texttt{Hackphyr} and \texttt{GPT-4}.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig4_markov_transitions_comparison.pdf}
-    \caption{Empirical 7$\times$7 Markov action-transition probability heatmaps in \texttt{Three-Networks + Monitor On} ($n=150$): \texttt{RawReAct} (left), \texttt{BeliefGraph\_\allowbreak{}NoStealth} (center), and \texttt{Proposed BeliefGraph + Minimax Utility} (right).}
+    \includegraphics[width=0.90\textwidth]{figures/fig4_markov_transitions_comparison.pdf}
+    \caption{Empirical 7$\times$7 Markov action-transition probability heatmaps in \texttt{Three-Networks + Monitor On} ($n=150$): \texttt{RawReAct} (left), \texttt{BeliefGraph\_NoStealth} (center), and \texttt{Proposed BeliefGraph + Minimax Utility} (right).}
     \label{fig:markov}
 \end{figure*}
 
-Three structural regimes emerge clearly in Figure~\ref{fig:markov}:
-\begin{enumerate}
-    \item \textbf{Entropy Collapse (\texttt{RawReAct}, left):} \texttt{Start} transitions deterministically (\texttt{1.00}) to \texttt{ScanNetwork}, which then exhibits a \texttt{1.00} self-loop (\texttt{ScanNetwork} $\rightarrow$ \texttt{ScanNetwork}), never transitioning to downstream exploitation ($H_t = 0.000$ bits).
-    \item \textbf{Breadth-First Bursting (\texttt{BeliefGraph\_\allowbreak{}NoStealth}, center):} Without minimax hazard shaping, \texttt{FindServices} exhibits a \texttt{0.54} self-loop alongside a \texttt{0.60} \texttt{ScanNetwork} $\rightarrow$ \texttt{FindServices} burst, a \texttt{0.34} \texttt{ScanNetwork} self-loop, and a \texttt{0.66} \texttt{ExfiltrateData} self-loop, concentrating consecutive service probes and exfiltration clusters that trip \texttt{GlobalDefender} ($H_t = 0.968$ bits).
-    \item \textbf{Interleaved Depth-First Progression (\texttt{BeliefGraph + Minimax Utility}, right):} \texttt{ScanNetwork} self-loops drop from \texttt{0.34} to \texttt{0.04}, \texttt{FindServices} self-loops collapse from \texttt{0.54} to \texttt{0.11}, \texttt{ExploitService} self-loops fall to \texttt{0.02}, and \texttt{ExfiltrateData} self-loops drop from \texttt{0.66} to \texttt{0.12} as the planner transitions cleanly from \texttt{FindServices} $\rightarrow$ \texttt{ExploitService} (\texttt{0.38}) and from \texttt{ExploitService} $\rightarrow$ \texttt{FindData} (\texttt{0.70}), lifting entropy to $H_t = 1.774$ bits.
-\end{enumerate}
-
-MITRE ATT\&CK phase-arrival timestamps from \texttt{statistical\_\allowbreak{}analysis\_\allowbreak{}report.\allowbreak{}json} corroborate this behavioral shift. In \texttt{Regime 2B} (\texttt{Three-Networks} + Monitor On), because NetSecGame initializes the attacker on a client foothold where local data resides, \texttt{FindData} occurs at median step \texttt{1.0} (\texttt{IQR = 0.0}) across all Belief Graph agents; however, reaching remote \texttt{Exploit\-Service} (the pivotal bottleneck required to penetrate server subnets A and B) improves markedly under \texttt{WithStealth}: \texttt{115/150} episodes reach \texttt{Exploit\-Service} at median step \textbf{\texttt{11.0}} (mean \texttt{11.31}), compared to only \texttt{89/150} episodes reaching it at median step \texttt{14.0} (mean \texttt{14.63}) for \texttt{BeliefGraph\_\allowbreak{}NoStealth} (and \texttt{0/150} for \texttt{RawReAct}). Similar gains hold in \texttt{Regime 1B} (\texttt{111/150} at median step \texttt{10.0}, mean \texttt{11.03}, vs. \texttt{97/150} at median step \texttt{14.0}, mean \texttt{14.44}).
-
-Figure~\ref{fig:pareto}(a) plots the step-wise Shannon Action Entropy $H_t$ ($w=5$) over $t \le 60$ steps with 95\% confidence ribbons. While \texttt{RawReAct} flatlines at $0.00$ bits and \texttt{BeliefGraph\_\allowbreak{}NoStealth} decays below $0.75$ bits before premature alert termination, both stealth-paced agents (\texttt{1.5B-BF16} at $1.634$ bits and \texttt{7B-NF4} at $1.774$ bits) sustain elevated phase diversity throughout episode execution. Figure~\ref{fig:pareto}(b) maps the resulting Hardware-Aware Pareto Frontier, highlighting that \texttt{1.5B-BF16} (\texttt{3.22 GB}, \texttt{42.67\%}, \texttt{1,294 ms/step}) and \texttt{7B-NF4} (\texttt{5.91 GB}, \texttt{59.33\%}, \texttt{1,678 ms/step}) strictly Pareto-dominate the \texttt{14 GB} FP16 \texttt{Hackphyr-7B} baseline (\texttt{23.3\%}) and cloud \texttt{GPT-4} (\texttt{36.4\%}).
-
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig5_entropy_and_pareto.pdf}
-    \caption{(a) Sliding-window Shannon action entropy $H_t$ ($w=5$, capped at $t \le 60$ with 95\% CI shading) on \texttt{Three-Networks + Monitor On}, and (b) Hardware-Aware Pareto Frontier comparing peak GPU VRAM (GB), per-step latency, and Win Rate (\%) against the published ESWA 2026 \texttt{Hackphyr 7B-FP16} reference ($23.3\%$, $\approx 14~\text{GB}$) and \texttt{GPT-4} ($36.4\%$).}
+    \includegraphics[width=0.90\textwidth]{figures/fig5_entropy_and_pareto.pdf}
+    \caption{(a) Sliding-window Shannon action entropy $H_t$ ($w=5$, $t \le 60$ with 95\% CI shading) on \texttt{Three-Networks + Monitor On}, and (b) Hardware-Aware Pareto Frontier comparing peak GPU VRAM (GB), latency, and Win Rate (\%) against ESWA 2026 \texttt{Hackphyr 7B-FP16} and \texttt{GPT-4}.}
     \label{fig:pareto}
 \end{figure*}
 
-\section{Discussion and Limitations}
-\label{sec:discussion}
+\textbf{Why Architecture Beats Behavioral Cloning:} Static SFT on small undefended graphs locks \texttt{Hackphyr} into breadth-first enumeration habits that fail when \texttt{GlobalDefender} monitors multi-subnet expansion. Moreover, because \texttt{Qwen2.5-Coder-7B-NF4} scores \texttt{0.00\%} in \texttt{RawReAct} mode, base-model capability alone accounts for zero progress; decoupling $\mathcal{G}_t$ and $U(a)$ unlocks zero-shot generalization. Ranking candidates by $U(a)$ also lifts \texttt{7B-NF4} \texttt{FirstPass \%} autonomy from \texttt{45.53\%--50.84\%} (\texttt{NoStealth}) to \texttt{77.40\%--80.92\%}, and 1-step reflexion elevates \texttt{PostReflexion \%} to \texttt{85.76\%--89.63\%} (vs.\ \texttt{62.15\%--65.72\%} at \texttt{1.5B}, quantifying the sub-7B reasoning threshold).
 
-\subsection{Why Zero-Shot Topological Planning Outperforms Supervised Fine-Tuning}
-Our empirical comparison underscores a counterintuitive yet operationally crucial lesson for autonomous cyber agents: \textbf{weight-level behavioral cloning (\texttt{Hackphyr}) transfers less reliably under active monitoring and topology shifts than decoupling state tracking ($\mathcal{G}_t$) from multi-scale utility shaping ($U(a)$) inside an untuned base SLM.} Fine-tuning a model on static trajectories from an undefended small network bakes in fixed horizon preferences---specifically, exhausting subnet-wide scans and multi-host service enumeration before pivoting. When the test topology expands to two server subnets (\texttt{Three-Networks}) and enables sliding-window anomaly alerts, those fine-tuned habits produce repetitive \texttt{FindServices} streaks that become fatal. By contrast, off-the-shelf \texttt{Qwen2.5-Coder} already possesses strong structured JSON synthesis and conditional ranking competence; once supplied with non-redundant epistemic host tags and minimax-scored valid candidates, its contextual reasoning generalizes instantaneously across unseen IP spaces and 5--8-hop chains without gradient updates.
-
-Crucially, an external reviewer might wonder whether these gains reflect base-model generational advances (\texttt{Qwen2.5-Coder-7B} versus the older \texttt{Zephyr-7B-$\beta$} backbone evaluated in Rigaki et al.~\cite{rigaki2026building}) rather than our cognitive architecture. Our \texttt{Ablation\_SLM\_7B\_NF4\_RawReAct} configuration directly controls for this factor: running the exact same \texttt{Qwen2.5-Coder-7B-NF4} weights in memoryless raw-prompt mode yields \texttt{0.00\%} win rates across all four regimes (\texttt{0.000} bits entropy; \texttt{98.67\%} detection under Monitor On). Base-model generation alone is therefore completely insufficient; architectural decoupling via $\mathcal{G}_t$, $U(a)$, and 1-step reflexion accounts for the entire behavioral leap.
-
-\subsection{Isolating Deterministic Utility Scaffolding from SLM Reasoning and Reflexion}
-Comparing \texttt{Ablation\_PureHeuristic\_WithStealth} ($\arg\max_a U(a)$) against the full SLM planner cleanly separates the contributions of deterministic hazard scoring versus language-model reasoning. On discrete structured state graphs, equipping the non-LLM heuristic with $U(a)$ lifts monitored win rates by \texttt{+23.33 pp} in \texttt{Full + Monitor On} (\texttt{48.00\%} $\rightarrow$ \texttt{71.33\%}) and \texttt{+27.33 pp} in \texttt{Three-Networks + Monitor On} (\texttt{38.00\%} $\rightarrow$ \texttt{65.33\%}), establishing that multi-scale hazard shaping is the primary driver of SIEM evasion. Layering \texttt{Qwen2.5-Coder-7B-NF4} on top preserves statistical win-rate parity across three of four regimes (McNemar $p = 0.500$ in 1A, $p = 0.804$ in 2A with a \texttt{+1.34 pp} edge [\texttt{94.67\%} vs. \texttt{93.33\%}], and $p = 0.175$ in 2B) while sustaining higher Shannon entropy ($1.749$--$1.774$ bits vs. $1.531$--$1.687$ bits) and genuine natural-language flexibility over \texttt{85.76\%--89.63\%} of steps (\texttt{PostReflexion \%}), whereas the \texttt{1.5B-BF16} SLM trails deterministic $\arg\max_a U(a)$ under monitoring (\texttt{48.67\%} and \texttt{42.67\%}), quantifying the reasoning threshold below \texttt{7B}. Meanwhile, across all four regimes, \texttt{Ablation\_SLM\_7B\_NF4\_BeliefGraph\_NoStealth} exhibited \texttt{45.53\%--50.84\%} first-pass autonomy and \texttt{63.56\%--73.77\%} post-reflexion autonomy. Introducing minimax-ordered prompting (\texttt{WithStealth}) raised \texttt{FirstPass \%} autonomy to \textbf{\texttt{77.40\%--80.92\%}}, and \textbf{1-Step Counterfactual Reflexion} pushed \texttt{PostReflexion \%} to \textbf{\texttt{85.76\%--89.63\%}}, leaving only \texttt{10.37\%--14.24\%} residual fallback overrides.
-
-\subsection{Limitations and Threats to Validity}
-Several boundaries qualify these results:
-\begin{enumerate}
-    \item \textbf{Residual Override Rate:} While \texttt{85.8\%--89.6\%} of \texttt{7B-NF4} decisions succeed genuinely via first-pass or 1-step reflexion, \texttt{10.4\%--14.2\%} of steps still invoke the top-$U(a)$ fallback when two consecutive JSON attempts repeat an already-exhausted parameter tuple or miss a required key. Future LoRA alignment or constrained-grammar JSON decoding (finite-state logit masking) could drive \texttt{Override \%} toward \texttt{0\%} without sacrificing domain agnosticism.
-    \item \textbf{Simulator Scope and Adaptive Defenders:} \texttt{GlobalDefender} models sliding-window threshold ratios and consecutive-type detectors over discrete abstract actions~\cite{rigaki2026building}. Real enterprise Security Operations Centers (SOCs) combine multi-host correlation graphs, payload-level signature inspection, and adaptive ML anomaly detectors (\texttt{IsolationForest} / graph neural detectors) that may penalize subtle behavioral invariants beyond $w \in \{3,5,8\}$ action frequencies.
-    \item \textbf{Single-Agent Scope:} Our study addresses single-attacker sequential decision-making (\texttt{AgentRole.Attacker}). Extending minimax hazard planning to cooperative multi-agent red/blue co-evolution or decoy-deception defense remains open future work.
-\end{enumerate}
+\textbf{Limitations:} Three boundaries apply: (i) \texttt{10.37\%--14.24\%} of \texttt{7B-NF4} steps still invoke the $\arg\max_a U(a)$ fallback after two failed passes, motivating finite-state grammar decoding; (ii) \texttt{GlobalDefender} uses discrete window/streak rules, whereas production SOCs deploy ML detectors (\texttt{IsolationForest}, graph neural alerts); and (iii) evaluation covers single-attacker \texttt{NetSecGame} topologies.
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-We introduced a training-free, strictly domain-agnostic cognitive planning framework for local Small Language Models (\texttt{1.5B}--$7\text{B}$) operating in monitored, dynamically randomized cyber simulation environments. By pairing a Topological Belief Graph ($\mathcal{G}_t$) with a Multi-Scale Minimax Hazard Utility function ($U(a)$ over $w \in \{3, 5, 8\}$), 1-Step Counterfactual Reflexion, balanced JSON-brace early stopping (\texttt{max\_new\_tokens=160}), and static-prefix \texttt{DynamicCache} KV-caching, our architecture eliminates action-repetition collapse and curbs sliding-window SIEM triggers without hardcoded scenario knowledge or prior knowledge of the defender's window length $W^*$. Across 11,600 randomized evaluation episodes spanning four \texttt{NetSecGame} regimes (including a deterministic $\arg\max_a U(a)$ control isolating scaffold vs. SLM contributions), zero-shot \texttt{Qwen2.5-Coder-7B-NF4} achieves \texttt{63.33\%} win rate in \texttt{Full + Monitor On} (\texttt{36.67\%} alert rate) and \texttt{59.33\%} in \texttt{Three-Networks + Monitor On} (\texttt{40.00\%} alert rate) inside \texttt{5.91--5.92 GB} peak VRAM---outperforming fine-tuned \texttt{Hackphyr-7B} (\texttt{44.00\%} and \texttt{23.33\%}, unpaired two-proportion $z$-test $p = 3.40 \times 10^{-4}$ and $p = 2.43 \times 10^{-10}$) and cloud \texttt{GPT-4} (\texttt{53.33\%} and \texttt{36.36\%}, $z$-test $p = 0.0208$ in \texttt{Three-Networks + Monitor On}) while reducing GPU memory by nearly $2.4\times$ relative to 14~GB FP16 deployments. Future directions include replacing discrete multi-scale windows with continuous-time Hawkes exponential-decay hazard kernels and online Bayesian posterior estimation over the unknown monitor horizon $W^*$, applying grammar-constrained token sampling to eliminate residual wrapper overrides, and evaluating minimax stealth policies against adaptive ML blue-team defenders.
+Directly addressing the open challenges in \citet{rigaki2026building}, this Research Note showed that pairing an untuned local SLM with a domain-agnostic Topological Belief Graph $\mathcal{G}_t$, Multi-Scale Minimax Hazard Utility $U(a)$ over $w \in \{3, 5, 8\}$, and 1-Step Counterfactual Reflexion with prefix KV-caching achieves \texttt{63.33\%} (\texttt{Full}) and \texttt{59.33\%} (\texttt{Three-Networks}) monitored win rates in under \texttt{5.92 GB} VRAM---outperforming fine-tuned \texttt{Hackphyr-7B} ($p \le 3.40 \times 10^{-4}$) and \texttt{GPT-4} ($p = 0.0208$ in \texttt{2B}) with zero task-specific training. Future work will generalize discrete window scales to continuous-time Hawkes exponential-decay hazard kernels with online Bayesian posterior estimation over $W^*$, integrate grammar-constrained logit masking to drive \texttt{Override~\%} toward zero, and test against adaptive ML blue-team defenders.
 
-\section*{CRediT authorship contribution statement}
-\textbf{Ali Tavakkoli:} Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Writing -- original draft, Writing -- review \& editing, Visualization.
+\printcredits
 
 \section*{Declaration of competing interest}
 The author declares that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
 
 \section*{Data availability}
-All evaluation configurations, zero-hardcoding test suites, aggregated episode/step benchmark summaries, statistical analysis scripts, and plotting code are publicly available at \url{https://github.com/AliTavakkoli80/NetSecGame} (branch \texttt{feature/stealth-belief-graph-slm}).
+{\sloppy Evaluation configurations, zero-hardcoding tests, consolidated summaries, statistical scripts, and plotting code are available at \url{https://github.com/AliTavakkoli80/NetSecGame} (branch \texttt{feature/stealth-belief-graph-slm}).\par}
 
-\bibliographystyle{elsarticle-num}
+\bibliographystyle{cas-model2-names}
 \bibliography{references}
 
 \end{document}
