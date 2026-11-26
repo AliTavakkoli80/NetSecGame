@@ -1,8 +1,9 @@
 """
-generate_paper_figures.py — Publication-Grade 300 DPI PNG & PDF Empirical Figures.
+generate_paper_figures.py — Publication-Grade Elsevier ESWA Empirical Figures.
 
 Reads completed metrics and statistical/entropy reports from
-`logs/benchmarks/final_paper_150ep/` and generates:
+`logs/benchmarks/final_paper_150ep/` and generates exact two-column (7.0 in / 178 mm)
+300 DPI PNG & PDF figures in `figures/`:
 1. figures/fig3_ablation_and_autonomy.{png,pdf}
 2. figures/fig4_markov_transitions_comparison.{png,pdf}
 3. figures/fig5_entropy_and_pareto.{png,pdf}
@@ -23,37 +24,43 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Unified Elsevier ESWA Q1 publication configuration (exact 7.0 in two-column scale)
 plt.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["DejaVu Sans"],
     "mathtext.fontset": "stix",
-    "font.size": 8.5,
-    "axes.titlesize": 9.2,
+    "font.size": 8.0,
+    "axes.titlesize": 9.5,
+    "axes.titleweight": "bold",
     "axes.labelsize": 8.5,
-    "xtick.labelsize": 7.4,
-    "ytick.labelsize": 7.6,
-    "legend.fontsize": 7.0,
+    "xtick.labelsize": 8.0,
+    "ytick.labelsize": 8.0,
+    "legend.fontsize": 8.0,
     "axes.spines.top": False,
     "axes.spines.right": False,
     "axes.edgecolor": "#334155",
+    "axes.linewidth": 0.9,
     "axes.grid": True,
-    "grid.color": "#CBD5E1",
-    "grid.alpha": 0.70,
+    "grid.color": "#94A3B8",
+    "grid.alpha": 0.25,
     "grid.linestyle": "--",
+    "grid.linewidth": 0.7,
     "pdf.fonttype": 42,
     "ps.fonttype": 42,
     "figure.dpi": 300,
 })
 
-# Shared editorial IEEE/Elsevier palette
-TEAL_ACCENT = "#0F766E"
-BLUE_ACCENT = "#1D4ED8"
-SLATE_ACCENT = "#475569"
-CRIMSON_ACCENT = "#B91C1C"
-BRICK_ACCENT = "#B45309"
+# Cohesive colorblind-safe & grayscale-friendly Q1 editorial palette
+TEAL = "#1B6B68"
+SLATE_BLUE = "#2B5C8F"
+CRIMSON = "#B83A3A"
+AMBER = "#D97706"
+CHARCOAL = "#334155"
+NEUTRAL_LIGHT = "#CBD5E1"
 TEXT_DARK = "#0F172A"
 TEXT_MUTED = "#475569"
 SUBTLE_BORDER = "#CBD5E1"
+BG_WHITE = "#FFFFFF"
 
 MARKOV_STATES = [
     "Start",
@@ -109,28 +116,32 @@ def _load_summary(path: Path) -> Dict[str, Any]:
 
 def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
     """
-    Three-panel empirical figure:
-    (a) Full + Monitor On Win/Alert across all 7 configs
-    (b) Three-Networks + Monitor On Win/Alert across all 7 configs
-    (c) SLM Decision Autonomy Breakdown (FirstPass, +Reflexion Gain, Residual Override)
+    Three-panel empirical figure at exact 7.0 in width:
+    (a) Full Topology (Monitor On) Win/Alert across all 7 configs
+    (b) Three-Networks (Monitor On) Win/Alert across all 7 configs
+    (c) SLM Autonomy Breakdown (First-Pass Valid, +1-Step Reflexion, Minimax Override)
     """
     regimes = [
         ("(a) Full Topology (Monitor On)", suite_root / "regime1b_full_defender"),
         ("(b) Three-Networks (Monitor On)", suite_root / "regime2b_threenets_defender"),
     ]
     configs = [
-        ("Rand", "Baseline_RandomAttacker_metrics.json"),
-        ("Heur\n-Stl", "Baseline_PureHeuristic_metrics.json"),
-        ("Heur\n+Stl", "Ablation_PureHeuristic_WithStealth_metrics.json"),
-        ("Raw\n7B", "Ablation_SLM_7B_NF4_RawReAct_metrics.json"),
-        ("Bel\n-Stl", "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth_metrics.json"),
+        ("Random", "Baseline_RandomAttacker_metrics.json"),
+        ("Heur\n(NoStl)", "Baseline_PureHeuristic_metrics.json"),
+        ("Heur\n(+Stl)", "Ablation_PureHeuristic_WithStealth_metrics.json"),
+        ("Raw\nReAct", "Ablation_SLM_7B_NF4_RawReAct_metrics.json"),
+        ("BG\n(NoStl)", "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth_metrics.json"),
         ("Prop\n1.5B", "Proposed_SLM_1.5B_BF16_BeliefGraph_WithStealth_metrics.json"),
         ("Prop\n7B", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth_metrics.json"),
     ]
 
-    fig = plt.figure(figsize=(10.5, 3.65))
-    gs = fig.add_gridspec(1, 3, width_ratios=[1.42, 1.42, 0.92], wspace=0.22)
-    axes = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[0, 2])]
+    fig = plt.figure(figsize=(6.78, 3.30))
+    gs_ab = fig.add_gridspec(1, 2, left=0.068, right=0.702, top=0.88, bottom=0.28, wspace=0.07)
+    gs_c = fig.add_gridspec(1, 1, left=0.790, right=0.988, top=0.88, bottom=0.28)
+    ax_a = fig.add_subplot(gs_ab[0, 0])
+    ax_b = fig.add_subplot(gs_ab[0, 1], sharey=ax_a)
+    ax_c = fig.add_subplot(gs_c[0, 0])
+    axes_ab = [ax_a, ax_b]
 
     def _fmt_pct(val: float) -> str:
         if 0.0 < val < 1.0:
@@ -138,10 +149,10 @@ def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
         return f"{val:.1f}"
 
     x = np.arange(len(configs))
-    width = 0.36
+    width = 0.35
 
     for idx_r, (title, rdir) in enumerate(regimes):
-        ax = axes[idx_r]
+        ax = axes_ab[idx_r]
         wins, win_cis, dets, det_cis = [], [], [], []
         for _, fname in configs:
             s = _load_summary(rdir / fname)
@@ -155,11 +166,13 @@ def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
             wins,
             width,
             yerr=win_cis,
-            capsize=2.2,
-            error_kw=dict(ecolor=TEXT_DARK, lw=0.90),
+            capsize=2.0,
+            error_kw=dict(ecolor=CHARCOAL, lw=0.85, capthick=0.85),
             label="Win Rate (%)",
-            color=TEAL_ACCENT,
-            alpha=0.93,
+            color=TEAL,
+            edgecolor=BG_WHITE,
+            linewidth=0.4,
+            alpha=0.95,
             zorder=2.5,
         )
         b2 = ax.bar(
@@ -167,70 +180,91 @@ def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
             dets,
             width,
             yerr=det_cis,
-            capsize=2.2,
-            error_kw=dict(ecolor=TEXT_DARK, lw=0.90),
+            capsize=2.0,
+            error_kw=dict(ecolor=CHARCOAL, lw=0.85, capthick=0.85),
             label="Alert Rate (%)",
-            color=CRIMSON_ACCENT,
-            alpha=0.88,
+            color=CRIMSON,
+            edgecolor=BG_WHITE,
+            linewidth=0.4,
+            alpha=0.92,
             zorder=2.5,
         )
 
-        # Place bar value labels strictly above the upper 95% CI error cap with anti-collision nudge
-        for i_bar, (bar1, ci1, bar2, ci2) in enumerate(zip(b1, win_cis, b2, det_cis)):
+        # Place bar labels strictly above the upper 95% CI cap (val + ci + 2.5)
+        labels_info: List[Dict[str, Any]] = []
+        for idx_bar, (bar1, ci1, bar2, ci2) in enumerate(zip(b1, win_cis, b2, det_cis)):
             h1, h2 = bar1.get_height(), bar2.get_height()
-            top1, top2 = h1 + ci1 + 2.2, h2 + ci2 + 2.2
-            close_pair = abs(top1 - top2) < 9.0
-            dx1 = -0.05 if close_pair else 0.0
-            dx2 = +0.05 if close_pair else 0.0
+            x1 = bar1.get_x() + bar1.get_width() / 2
+            x2 = bar2.get_x() + bar2.get_width() / 2
+            # Keep tiny bars' labels away from tall partner bars and from the left y-axis
+            if h2 - h1 > 20.0:
+                x1 -= 0.03 if idx_bar == 0 else 0.06
+            elif h1 - h2 > 20.0:
+                x2 += 0.06
+            labels_info.append({"x": x1, "y": h1 + ci1 + 2.5, "text": _fmt_pct(h1), "color": TEAL})
+            labels_info.append({"x": x2, "y": h2 + ci2 + 2.5, "text": _fmt_pct(h2), "color": CRIMSON})
+
+        # General pairwise anti-collision pass (both intra-group and cross-group neighbors)
+        for idx_l in range(len(labels_info) - 1):
+            cur = labels_info[idx_l]
+            nxt = labels_info[idx_l + 1]
+            if abs(nxt["x"] - cur["x"]) < 0.72 and abs(nxt["y"] - cur["y"]) < 8.5:
+                if nxt["y"] >= cur["y"]:
+                    nxt["y"] = cur["y"] + 8.5
+                else:
+                    cur["y"] = nxt["y"] + 8.5
+
+        for lbl in labels_info:
             ax.text(
-                bar1.get_x() + bar1.get_width() / 2 + dx1,
-                top1,
-                _fmt_pct(h1),
-                ha="right" if close_pair else "center",
+                lbl["x"],
+                lbl["y"],
+                lbl["text"],
+                ha="center",
                 va="bottom",
-                fontsize=6.6,
-                color=TEAL_ACCENT,
-                fontweight="bold",
-                zorder=3.5,
-            )
-            ax.text(
-                bar2.get_x() + bar2.get_width() / 2 + dx2,
-                top2,
-                _fmt_pct(h2),
-                ha="left" if close_pair else "center",
-                va="bottom",
-                fontsize=6.6,
-                color=CRIMSON_ACCENT,
+                fontsize=6.0,
+                color=lbl["color"],
                 fontweight="bold",
                 zorder=3.5,
             )
 
-        ax.set_title(title, fontweight="bold", fontsize=9.2, pad=8, color=TEXT_DARK)
+        ax.set_title(title, fontweight="bold", fontsize=8.4, pad=7, color=TEXT_DARK)
+        ax.set_xlim(-0.62, len(configs) - 1 + 0.58)
         ax.set_xticks(x)
-        ax.set_xticklabels([c[0] for c in configs], fontsize=7.6, color=TEXT_DARK)
-        ax.set_ylim(0, 116)
+        ax.set_xticklabels([c[0] for c in configs], fontsize=5.6, color=TEXT_DARK)
+        ax.set_ylim(0, 118)
         ax.set_yticks([0, 20, 40, 60, 80, 100])
         ax.tick_params(axis="y", labelsize=7.8)
-        ax.grid(axis="y", linestyle="--", color=SUBTLE_BORDER, alpha=0.70, zorder=0.5)
+        ax.grid(axis="y", linestyle="--", color="#94A3B8", alpha=0.25, zorder=0.5)
+        ax.grid(axis="x", visible=False)
         ax.set_axisbelow(True)
         if idx_r == 0:
-            ax.set_ylabel("Percentage (%) with 95% CI", fontsize=8.8, color=TEXT_DARK)
-        ax.legend(
-            loc="upper right",
-            fontsize=7.3,
-            frameon=True,
-            facecolor="#FFFFFF",
-            edgecolor=SUBTLE_BORDER,
-            framealpha=0.96,
-        )
+            ax.set_ylabel("Percentage (%) with 95% CI", fontsize=8.4, color=TEXT_DARK)
+        else:
+            plt.setp(ax.get_yticklabels(), visible=False)
+
+    # Shared horizontal legend centered cleanly beneath panels (a)-(b)
+    handles_ab, labels_ab = ax_a.get_legend_handles_labels()
+    fig.legend(
+        handles_ab,
+        labels_ab,
+        loc="upper center",
+        bbox_to_anchor=(0.396, 0.13),
+        ncol=2,
+        fontsize=7.5,
+        handlelength=1.4,
+        columnspacing=1.2,
+        frameon=True,
+        facecolor=BG_WHITE,
+        edgecolor=SUBTLE_BORDER,
+        framealpha=0.98,
+    )
 
     # Panel (c): Stacked Autonomy Breakdown on Three-Networks + Monitor On
-    ax_c = axes[2]
     r2b_dir = suite_root / "regime2b_threenets_defender"
     aut_configs = [
-        ("Bel\n-Stl (7B)", "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth_metrics.json"),
-        ("Prop\n1.5B", "Proposed_SLM_1.5B_BF16_BeliefGraph_WithStealth_metrics.json"),
-        ("Prop\n7B", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth_metrics.json"),
+        ("BG NoStl\n(7B)", "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth_metrics.json"),
+        ("Proposed\n1.5B", "Proposed_SLM_1.5B_BF16_BeliefGraph_WithStealth_metrics.json"),
+        ("Proposed\n7B", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth_metrics.json"),
     ]
     fp_vals, ref_gains, ovr_vals = [], [], []
     for _, fname in aut_configs:
@@ -247,104 +281,140 @@ def plot_fig3_ablation_and_autonomy(suite_root: Path, out_dir: Path) -> None:
     rg_arr = np.asarray(ref_gains)
     ov_arr = np.asarray(ovr_vals)
 
-    ax_c.bar(xc, fp_arr, 0.50, label="First-Pass Valid (%)", color=TEAL_ACCENT, alpha=0.93, zorder=2.5)
-    ax_c.bar(xc, rg_arr, 0.50, bottom=fp_arr, label="+1-Step Reflexion (%)", color=BLUE_ACCENT, alpha=0.88, zorder=2.5)
-    ax_c.bar(xc, ov_arr, 0.50, bottom=fp_arr + rg_arr, label="Minimax Override (%)", color="#94A3B8", alpha=0.88, zorder=2.5)
+    ax_c.bar(xc, fp_arr, 0.68, label="First-Pass", color=TEAL, edgecolor=BG_WHITE, linewidth=0.5, alpha=0.95, zorder=2.5)
+    ax_c.bar(xc, rg_arr, 0.68, bottom=fp_arr, label="+Reflexion", color=SLATE_BLUE, edgecolor=BG_WHITE, linewidth=0.5, alpha=0.92, zorder=2.5)
+    ax_c.bar(xc, ov_arr, 0.68, bottom=fp_arr + rg_arr, label="Override", color=NEUTRAL_LIGHT, edgecolor=CHARCOAL, linewidth=0.5, alpha=0.90, zorder=2.5)
 
     for i in range(len(aut_configs)):
-        ax_c.text(xc[i], fp_arr[i] / 2.0, f"{fp_arr[i]:.1f}%", ha="center", va="center", color="white", fontweight="bold", fontsize=7.6, zorder=3.5)
+        ax_c.text(xc[i], fp_arr[i] / 2.0, f"{fp_arr[i]:.1f}%", ha="center", va="center", color="white", fontweight="bold", fontsize=5.8, zorder=3.5)
         if rg_arr[i] >= 6.0:
-            ax_c.text(xc[i], fp_arr[i] + rg_arr[i] / 2.0, f"+{rg_arr[i]:.1f}%", ha="center", va="center", color="white", fontweight="bold", fontsize=7.4, zorder=3.5)
+            ax_c.text(xc[i], fp_arr[i] + rg_arr[i] / 2.0, f"+{rg_arr[i]:.1f}%", ha="center", va="center", color="white", fontweight="bold", fontsize=5.7, zorder=3.5)
         if ov_arr[i] >= 8.0:
-            ax_c.text(xc[i], fp_arr[i] + rg_arr[i] + ov_arr[i] / 2.0, f"{ov_arr[i]:.1f}%", ha="center", va="center", color=TEXT_DARK, fontweight="bold", fontsize=7.4, zorder=3.5)
+            ax_c.text(xc[i], fp_arr[i] + rg_arr[i] + ov_arr[i] / 2.0, f"{ov_arr[i]:.1f}%", ha="center", va="center", color=CHARCOAL, fontweight="bold", fontsize=5.7, zorder=3.5)
 
-    ax_c.set_title("(c) SLM Autonomy Breakdown", fontweight="bold", fontsize=9.2, pad=8, color=TEXT_DARK)
+    ax_c.set_title("(c) SLM Autonomy Breakdown", fontweight="bold", fontsize=8.3, pad=7, color=TEXT_DARK)
+    ax_c.set_xlim(-0.54, len(aut_configs) - 1 + 0.54)
     ax_c.set_xticks(xc)
-    ax_c.set_xticklabels([c[0] for c in aut_configs], fontsize=7.8, color=TEXT_DARK)
-    ax_c.set_ylim(0, 134)
+    ax_c.set_xticklabels([c[0] for c in aut_configs], fontsize=6.0, color=TEXT_DARK)
+    ax_c.set_ylim(0, 118)
     ax_c.set_yticks([0, 20, 40, 60, 80, 100])
     ax_c.tick_params(axis="y", labelsize=7.8)
-    ax_c.set_ylabel("Share of Executed Steps (%)", fontsize=8.8, color=TEXT_DARK)
-    ax_c.grid(axis="y", linestyle="--", color=SUBTLE_BORDER, alpha=0.70, zorder=0.5)
+    ax_c.set_ylabel("Share of Executed Steps (%)", fontsize=8.2, color=TEXT_DARK, labelpad=2)
+    ax_c.grid(axis="y", linestyle="--", color="#94A3B8", alpha=0.25, zorder=0.5)
+    ax_c.grid(axis="x", visible=False)
     ax_c.set_axisbelow(True)
-    ax_c.legend(
-        loc="upper right",
-        fontsize=7.0,
+
+    handles_c, labels_c = ax_c.get_legend_handles_labels()
+    fig.legend(
+        handles_c,
+        labels_c,
+        loc="upper center",
+        bbox_to_anchor=(0.885, 0.13),
+        ncol=3,
+        fontsize=6.5,
+        handlelength=0.95,
+        handletextpad=0.30,
+        columnspacing=0.55,
         frameon=True,
-        facecolor="#FFFFFF",
+        facecolor=BG_WHITE,
         edgecolor=SUBTLE_BORDER,
-        framealpha=0.96,
+        framealpha=0.98,
     )
 
-    fig.subplots_adjust(left=0.055, right=0.99, top=0.89, bottom=0.19)
     for ext in ("png", "pdf"):
-        fig.savefig(out_dir / f"fig3_ablation_and_autonomy.{ext}", dpi=300, bbox_inches="tight", pad_inches=0.05)
+        fig.savefig(out_dir / f"fig3_ablation_and_autonomy.{ext}", dpi=300, bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)
 
 
 def plot_fig4_markov_transitions(suite_root: Path, out_dir: Path) -> None:
-    """7x7 Action Transition Probability Heatmaps on Three-Networks + Monitor On."""
+    """7x7 Action Transition Probability Heatmaps on Three-Networks + Monitor On (7.0 in width)."""
     regime_dir = suite_root / "regime2b_threenets_defender"
     panels = [
-        ("(a) Raw ReAct (7B-NF4)", "Ablation_SLM_7B_NF4_RawReAct_steps.csv"),
-        ("(b) BeliefGraph NoStealth (7B-NF4)", "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth_steps.csv"),
-        ("(c) BeliefGraph + Minimax Utility (7B-NF4)", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth_steps.csv"),
+        ("(a) Raw ReAct\n(7B-NF4)", "Ablation_SLM_7B_NF4_RawReAct_steps.csv"),
+        ("(b) BeliefGraph NoStealth\n(7B-NF4)", "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth_steps.csv"),
+        ("(c) BeliefGraph + Minimax\nUtility (7B-NF4)", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth_steps.csv"),
     ]
 
-    fig, axes = plt.subplots(1, 3, figsize=(10.5, 3.60), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(6.90, 2.80), sharey=True)
     short_labels = ["Start", "Scan", "FindSrv", "Exploit", "FindData", "Exfil", "Invalid"]
 
     im = None
     for idx_p, (ax, (title, csv_name)) in enumerate(zip(axes, panels)):
         probs = compute_transition_matrix(regime_dir / csv_name)
         ax.grid(False)
-        ax.spines["top"].set_visible(True)
-        ax.spines["right"].set_visible(True)
-        im = ax.imshow(probs, vmin=0.0, vmax=1.0, cmap="YlGnBu", aspect="auto")
-        ax.set_title(title, fontweight="bold", fontsize=9.0, pad=8, color=TEXT_DARK)
+        for sp in ("top", "right", "bottom", "left"):
+            ax.spines[sp].set_visible(True)
+            ax.spines[sp].set_color(CHARCOAL)
+            ax.spines[sp].set_linewidth(0.85)
+
+        im = ax.imshow(probs, vmin=0.0, vmax=1.0, cmap="YlGnBu", aspect="equal")
+        ax.set_title(title, fontweight="bold", fontsize=8.8, pad=6, color=TEXT_DARK)
         ax.set_xticks(range(len(short_labels)))
-        ax.set_xticklabels(short_labels, rotation=35, ha="right", fontsize=7.6)
+        ax.set_xticklabels(short_labels, rotation=40, ha="right", rotation_mode="anchor", fontsize=7.5, color=TEXT_DARK)
         ax.set_yticks(range(len(short_labels)))
-        ax.set_yticklabels(short_labels, fontsize=7.6)
-        ax.set_xlabel("Next Action", fontsize=8.6, color=TEXT_DARK)
+        ax.set_yticklabels(short_labels, fontsize=7.6, color=TEXT_DARK)
+        ax.set_xlabel("Next Action", fontsize=8.5, color=TEXT_DARK, labelpad=4)
+
+        # Subtle white grid lines between heatmap cells for crisp reading
+        ax.set_xticks(np.arange(-0.5, len(short_labels), 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, len(short_labels), 1), minor=True)
+        ax.grid(which="minor", color=BG_WHITE, linestyle="-", linewidth=0.5, alpha=0.55)
+        ax.tick_params(which="minor", bottom=False, left=False)
+
         if idx_p > 0:
             ax.tick_params(axis="y", left=False)
 
         for i in range(probs.shape[0]):
             for j in range(probs.shape[1]):
                 val = probs[i, j]
-                if val >= 0.01:
-                    color = "white" if val >= 0.55 else "black"
-                    ax.text(j, i, f"{val:.2f}", ha="center", va="center", color=color, fontsize=7.2)
+                if round(val, 2) >= 0.01:
+                    is_high = val >= 0.55
+                    txt_color = "#FFFFFF" if is_high else "#1E293B"
+                    ax.text(
+                        j,
+                        i,
+                        f"{val:.2f}",
+                        ha="center",
+                        va="center",
+                        color=txt_color,
+                        fontweight="bold" if is_high else "normal",
+                        fontsize=6.7,
+                    )
 
-    axes[0].set_ylabel("Current State / Action", fontsize=8.6, color=TEXT_DARK)
-    fig.subplots_adjust(left=0.075, right=0.895, top=0.89, bottom=0.22, wspace=0.12)
+    axes[0].set_ylabel("Current Action / State", fontsize=8.5, color=TEXT_DARK, labelpad=4)
+    fig.subplots_adjust(left=0.095, right=0.885, top=0.84, bottom=0.22, wspace=0.10)
+
+    # Align colorbar precisely to rendered heatmap box height
+    fig.canvas.draw()
+    pos_right = axes[-1].get_position()
     if im is not None:
-        cbar_ax = fig.add_axes([0.912, 0.22, 0.015, 0.67])
+        cbar_ax = fig.add_axes([0.902, pos_right.y0, 0.016, pos_right.height])
         cbar = fig.colorbar(im, cax=cbar_ax)
-        cbar.ax.tick_params(labelsize=7.6)
-        cbar.set_label("Transition Probability $P(a_{t+1} \\mid a_t)$", fontsize=8.5, labelpad=6)
+        cbar.outline.set_edgecolor(CHARCOAL)
+        cbar.outline.set_linewidth(0.85)
+        cbar.ax.tick_params(labelsize=7.8)
+        cbar.set_label("Transition Probability $P(a_{t+1} \\mid a_t)$", fontsize=8.3, labelpad=6, color=TEXT_DARK)
 
     for ext in ("png", "pdf"):
-        fig.savefig(out_dir / f"fig4_markov_transitions_comparison.{ext}", dpi=300, bbox_inches="tight", pad_inches=0.05)
+        fig.savefig(out_dir / f"fig4_markov_transitions_comparison.{ext}", dpi=300, bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)
 
 
 def plot_fig5_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
-    """Two-panel figure: (a) Sliding-window Shannon Entropy H_t, (b) Hardware Pareto Frontier."""
+    """Two-panel figure at exact 7.0 in width: (a) Entropy H_t, (b) Hardware Pareto Frontier."""
     stat_path = suite_root / "statistical_analysis_report.json"
     stat_data = json.loads(stat_path.read_text(encoding="utf-8")) if stat_path.exists() else {}
     r2b_ent = stat_data.get("regimes", {}).get("regime2b_threenets_defender", {}).get("entropy_and_phases", {})
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 3.85))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.0, 3.25))
 
     series = [
-        ("RawReAct (7B-NF4)", "Ablation_SLM_7B_NF4_RawReAct", SLATE_ACCENT, "--"),
-        ("BeliefGraph NoStealth", "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth", CRIMSON_ACCENT, "-."),
-        ("Proposed 1.5B-BF16", "Proposed_SLM_1.5B_BF16_BeliefGraph_WithStealth", BLUE_ACCENT, "-"),
-        ("Proposed 7B-NF4", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth", TEAL_ACCENT, "-"),
+        ("RawReAct (7B-NF4)", "Ablation_SLM_7B_NF4_RawReAct", CHARCOAL, ":", "D"),
+        ("BeliefGraph NoStealth", "Ablation_SLM_7B_NF4_BeliefGraph_NoStealth", CRIMSON, "-.", "^"),
+        ("Proposed 1.5B-BF16", "Proposed_SLM_1.5B_BF16_BeliefGraph_WithStealth", SLATE_BLUE, "--", "o"),
+        ("Proposed 7B-NF4", "Proposed_SLM_7B_NF4_BeliefGraph_WithStealth", TEAL, "-", "s"),
     ]
-    for label, key, color, ls in series:
+    for label, key, color, ls, marker in series:
         traj = r2b_ent.get(key, {}).get("entropy_trajectory", [])
         if not traj:
             continue
@@ -353,29 +423,41 @@ def plot_fig5_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
         cis = [pt["ci95_entropy"] for pt in traj if pt["n"] >= 3 and pt["step"] <= 60]
         if not steps:
             continue
-        ax1.plot(steps, means, label=label, color=color, linestyle=ls, linewidth=1.7, zorder=3.0)
+        ax1.plot(
+            steps,
+            means,
+            label=label,
+            color=color,
+            linestyle=ls,
+            marker=marker,
+            markevery=9,
+            markersize=3.4,
+            linewidth=1.55,
+            zorder=3.0,
+        )
         lower = np.maximum(0.0, np.asarray(means) - np.asarray(cis))
         upper = np.asarray(means) + np.asarray(cis)
         ax1.fill_between(steps, lower, upper, color=color, alpha=0.11, zorder=2.0)
 
-    ax1.set_title("(a) Sliding-Window Action Entropy $H_t$", fontweight="bold", fontsize=9.2, color=TEXT_DARK)
-    ax1.set_xlabel("Episode Step $t$", fontsize=8.6, color=TEXT_DARK)
-    ax1.set_ylabel("Shannon Entropy $H_t$ (bits)", fontsize=8.6, color=TEXT_DARK)
+    ax1.set_title("(a) Sliding-Window Action Entropy $H_t$\n(Three-Networks, Monitor On)", fontweight="bold", fontsize=9.0, pad=6, color=TEXT_DARK)
+    ax1.set_xlabel("Episode Step $t$", fontsize=8.5, color=TEXT_DARK)
+    ax1.set_ylabel("Shannon Entropy $H_t$ (bits)", fontsize=8.5, color=TEXT_DARK)
     ax1.set_xlim(1, 60)
-    ax1.set_ylim(-0.05, 2.48)
-    ax1.tick_params(labelsize=7.8)
-    ax1.grid(True, linestyle="--", color=SUBTLE_BORDER, alpha=0.70, zorder=0.5)
+    ax1.set_ylim(-0.08, 2.58)
+    ax1.tick_params(labelsize=8.0)
+    ax1.grid(True, linestyle="--", color="#94A3B8", alpha=0.25, zorder=0.5)
     ax1.legend(
         loc="upper center",
-        bbox_to_anchor=(0.48, 0.99),
+        bbox_to_anchor=(0.5, 0.99),
         ncol=2,
-        fontsize=6.9,
-        columnspacing=0.9,
+        fontsize=6.6,
+        columnspacing=0.65,
         handlelength=1.6,
+        handletextpad=0.35,
         frameon=True,
-        facecolor="#FFFFFF",
+        facecolor=BG_WHITE,
         edgecolor=SUBTLE_BORDER,
-        framealpha=0.96,
+        framealpha=0.92,
     )
 
     r2b_dir = suite_root / "regime2b_threenets_defender"
@@ -396,90 +478,99 @@ def plot_fig5_entropy_and_pareto(suite_root: Path, out_dir: Path) -> None:
     ax2.plot(
         frontier_x,
         frontier_y,
-        color=TEAL_ACCENT,
+        color=TEAL,
         linestyle="-",
-        linewidth=1.7,
-        alpha=0.85,
+        linewidth=1.8,
+        alpha=0.90,
         zorder=3.0,
-        label="Pareto-Optimal Frontier",
     )
-    ax2.fill_between(frontier_x, 0.0, frontier_y, color=TEAL_ACCENT, alpha=0.06, zorder=1.0)
+    ax2.fill_between(frontier_x, 0.0, frontier_y, color=TEAL, alpha=0.07, zorder=1.0)
 
     # Cloud GPT-4 reference line (ESWA 2026: 36.36% -> 36.4%)
     gpt4_win = 36.36
-    ax2.axhline(gpt4_win, color=SLATE_ACCENT, linestyle="--", linewidth=1.15, alpha=0.85, zorder=2.2)
+    ax2.axhline(gpt4_win, color=CHARCOAL, linestyle="--", linewidth=1.15, alpha=0.85, zorder=2.2)
     ax2.text(
         16.1,
-        gpt4_win + 1.5,
+        gpt4_win + 1.4,
         "GPT-4 (ESWA 2026): 36.4% (Cloud API)",
         ha="right",
         va="bottom",
-        fontsize=7.3,
-        color=SLATE_ACCENT,
+        fontsize=6.9,
+        color=CHARCOAL,
         fontweight="bold",
         zorder=4.0,
     )
 
-    # Scatter markers + short, non-crossing leader lines with generous axis margins
-    ax2.scatter([vram_15], [win_15], s=110, color=BLUE_ACCENT, marker="o", zorder=5.0, edgecolors="#0F172A", linewidth=0.9)
-    ax2.annotate(
-        f"Proposed 1.5B-BF16 (Ours)\n{vram_15:.2f} GB, {win_15:.1f}% ({lat_15:.0f} ms/step)",
-        xy=(vram_15, win_15),
-        xytext=(0.40, 72.5),
-        fontsize=7.0,
-        color=BLUE_ACCENT,
-        fontweight="bold",
-        arrowprops=dict(arrowstyle="-", color=BLUE_ACCENT, lw=0.85, shrinkA=2, shrinkB=5),
-        zorder=5.5,
-    )
-
-    ax2.scatter([vram_7b], [win_7b], s=110, color=TEAL_ACCENT, marker="s", zorder=5.0, edgecolors="#0F172A", linewidth=0.9)
-    ax2.annotate(
-        f"Proposed 7B-NF4 (Ours)\n{vram_7b:.2f} GB, {win_7b:.1f}% ({lat_7b:.0f} ms/step)",
-        xy=(vram_7b, win_7b),
-        xytext=(8.2, 72.5),
-        fontsize=7.0,
-        color=TEAL_ACCENT,
-        fontweight="bold",
-        arrowprops=dict(arrowstyle="-", color=TEAL_ACCENT, lw=0.85, shrinkA=2, shrinkB=5),
-        zorder=5.5,
-    )
-
-    ax2.scatter([14.0], [23.33], s=115, color=CRIMSON_ACCENT, marker="^", zorder=5.0, edgecolors="#0F172A", linewidth=0.9)
-    ax2.annotate(
-        "Hackphyr 7B-FP16 (ESWA 2026)\n14.00 GB, 23.3% (Dominated)",
-        xy=(14.0, 23.33),
-        xytext=(7.8, 10.5),
-        fontsize=7.3,
-        color=CRIMSON_ACCENT,
-        fontweight="bold",
-        arrowprops=dict(arrowstyle="-", color=CRIMSON_ACCENT, lw=0.85, shrinkA=2, shrinkB=5),
-        zorder=5.5,
-    )
-
     ax2.text(
         16.1,
-        win_7b + 1.5,
+        win_7b - 1.8,
         "Pareto-Optimal Frontier",
         ha="right",
-        va="bottom",
-        fontsize=7.3,
-        color=TEAL_ACCENT,
+        va="top",
+        fontsize=6.9,
+        color=TEAL,
         fontstyle="italic",
         zorder=4.0,
     )
 
-    ax2.set_title("(b) Hardware-Aware Pareto Frontier", fontweight="bold", fontsize=9.2, color=TEXT_DARK)
-    ax2.set_xlabel("Peak GPU VRAM Footprint (GB)", fontsize=8.6, color=TEXT_DARK)
-    ax2.set_ylabel("Win Rate (%) — Three-Networks + Mon. On", fontsize=8.4, color=TEXT_DARK)
-    ax2.set_xlim(0.0, 16.5)
-    ax2.set_ylim(0.0, 88.0)
-    ax2.tick_params(labelsize=7.8)
-    ax2.grid(True, linestyle="--", color=SUBTLE_BORDER, alpha=0.70, zorder=0.5)
+    # Scatter markers & non-overlapping framed callout boxes inside (0..16.5, 0..80)
+    ax2.scatter([vram_15], [win_15], s=68, color=SLATE_BLUE, marker="o", zorder=5.0, edgecolors=TEXT_DARK, linewidth=0.9)
+    ax2.annotate(
+        f"Proposed 1.5B-BF16 (Ours)\n{vram_15:.2f} GB, {win_15:.1f}%\n({lat_15:.0f} ms/step)",
+        xy=(vram_15, win_15),
+        xytext=(0.35, 64.0),
+        ha="left",
+        va="bottom",
+        fontsize=6.0,
+        color=SLATE_BLUE,
+        fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.18", fc=BG_WHITE, ec=SLATE_BLUE, lw=0.75, alpha=0.96),
+        arrowprops=dict(arrowstyle="-|>", color=SLATE_BLUE, lw=0.9, shrinkA=1, shrinkB=5),
+        zorder=5.5,
+    )
 
-    fig.subplots_adjust(left=0.065, right=0.985, top=0.90, bottom=0.14, wspace=0.22)
+    ax2.scatter([vram_7b], [win_7b], s=68, color=TEAL, marker="s", zorder=5.0, edgecolors=TEXT_DARK, linewidth=0.9)
+    ax2.annotate(
+        f"Proposed 7B-NF4 (Ours)\n{vram_7b:.2f} GB, {win_7b:.1f}%\n({lat_7b:.0f} ms/step)",
+        xy=(vram_7b, win_7b),
+        xytext=(16.15, 64.0),
+        ha="right",
+        va="bottom",
+        fontsize=6.0,
+        color=TEAL,
+        fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.18", fc=BG_WHITE, ec=TEAL, lw=0.75, alpha=0.96),
+        arrowprops=dict(arrowstyle="-|>", color=TEAL, lw=0.9, shrinkA=1, shrinkB=5),
+        zorder=5.5,
+    )
+
+    ax2.scatter([14.0], [23.33], s=74, color=CRIMSON, marker="^", zorder=5.0, edgecolors=TEXT_DARK, linewidth=0.9)
+    ax2.annotate(
+        "Hackphyr 7B-FP16 (ESWA 2026)\n14.00 GB, 23.3% (Dominated)",
+        xy=(14.0, 23.33),
+        xytext=(10.8, 7.0),
+        ha="right",
+        va="bottom",
+        fontsize=6.7,
+        color=CRIMSON,
+        fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.22", fc=BG_WHITE, ec=CRIMSON, lw=0.75, alpha=0.96),
+        arrowprops=dict(arrowstyle="-|>", color=CRIMSON, lw=0.9, shrinkA=1, shrinkB=5),
+        zorder=5.5,
+    )
+
+    ax2.set_title("(b) Hardware-Aware Pareto Frontier\n(VRAM vs. Win Rate)", fontweight="bold", fontsize=9.0, pad=6, color=TEXT_DARK)
+    ax2.set_xlabel("Peak GPU VRAM Footprint (GB)", fontsize=8.5, color=TEXT_DARK)
+    ax2.set_ylabel("Win Rate (%) — Three-Nets + Mon.", fontsize=8.3, color=TEXT_DARK)
+    ax2.set_xlim(0.0, 16.5)
+    ax2.set_ylim(0.0, 80.0)
+    ax2.set_xticks([0, 2, 4, 6, 8, 10, 12, 14, 16])
+    ax2.tick_params(labelsize=8.0)
+    ax2.grid(True, linestyle="--", color="#94A3B8", alpha=0.25, zorder=0.5)
+
+    fig.subplots_adjust(left=0.075, right=0.985, top=0.84, bottom=0.15, wspace=0.28)
     for ext in ("png", "pdf"):
-        fig.savefig(out_dir / f"fig5_entropy_and_pareto.{ext}", dpi=300, bbox_inches="tight", pad_inches=0.05)
+        fig.savefig(out_dir / f"fig5_entropy_and_pareto.{ext}", dpi=300, bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)
 
 
